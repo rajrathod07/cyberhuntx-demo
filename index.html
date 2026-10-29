@@ -1,229 +1,3281 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><title>CyberHuntX — Demo</title>
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="description" content="CyberHuntX defensive file-review and endpoint-telemetry demonstration workspace.">
-<meta name="theme-color" content="#f4f6fb">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<style>
-:root{
-  color-scheme:light;
-  --bg:#f4f6fb;--card:#fff;--surface:#f8faff;--tx:#172033;--mut:#65738a;--bd:#e3e8f2;
-  --ac:#5146e5;--ac-hover:#4338ca;--ac2:#0891b2;--ok:#07845f;--wa:#a85f08;--er:#c52c43;
-  --hd:rgba(255,255,255,.88);--shadow:0 12px 32px rgba(21,31,63,.055);--shadow-sm:0 2px 10px rgba(21,31,63,.045);
-  --radius:18px;--focus:0 0 0 4px color-mix(in srgb,var(--ac) 19%,transparent);
-}
-:root[data-theme="dark"]{
-  color-scheme:dark;--bg:#0a1020;--card:#111a2d;--surface:#0d1628;--tx:#edf2ff;--mut:#9aa8c0;--bd:#27334b;
-  --ac:#a49aff;--ac-hover:#b9b1ff;--ac2:#4bd0e5;--ok:#4bd4a7;--wa:#ffc56e;--er:#ff8290;
-  --hd:rgba(10,16,32,.91);--shadow:0 12px 34px rgba(0,0,0,.2);--shadow-sm:0 2px 12px rgba(0,0,0,.12);
-}
-@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){color-scheme:dark;--bg:#0a1020;--card:#111a2d;--surface:#0d1628;--tx:#edf2ff;--mut:#9aa8c0;--bd:#27334b;--ac:#a49aff;--ac-hover:#b9b1ff;--ac2:#4bd0e5;--ok:#4bd4a7;--wa:#ffc56e;--er:#ff8290;--hd:rgba(10,16,32,.91);--shadow:0 12px 34px rgba(0,0,0,.2);--shadow-sm:0 2px 12px rgba(0,0,0,.12)}}
-*{box-sizing:border-box}
-html{min-width:320px;scroll-behavior:smooth;scroll-padding-top:110px;-webkit-text-size-adjust:100%}
-body{margin:0;min-width:320px;background:radial-gradient(950px 430px at 3% -9%,color-mix(in srgb,var(--ac) 9%,transparent),transparent),radial-gradient(760px 400px at 100% 0,color-mix(in srgb,var(--ac2) 8%,transparent),transparent),var(--bg);color:var(--tx);font:14px/1.6 Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;letter-spacing:-.012em;-webkit-font-smoothing:antialiased}
-button,input,select,textarea{font:inherit}button{touch-action:manipulation}button:disabled{opacity:.45;cursor:not-allowed}
-[hidden]{display:none!important}
-.demo{position:relative;z-index:25;min-height:34px;display:flex;align-items:center;justify-content:center;padding:7px 16px;text-align:center;font-size:11px;line-height:1.45;font-weight:750;letter-spacing:.045em;text-transform:uppercase;background:color-mix(in srgb,var(--wa) 11%,var(--card));color:var(--tx);border-bottom:1px solid color-mix(in srgb,var(--wa) 29%,transparent)}
-.app-header{position:sticky;top:0;z-index:20;display:grid;grid-template-columns:auto minmax(0,1fr) auto;grid-template-areas:"brand nav actions";align-items:center;gap:18px;padding:11px clamp(14px,2.6vw,34px);background:var(--hd);color:var(--tx);border-bottom:1px solid color-mix(in srgb,var(--bd) 85%,transparent);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px)}
-.brand{grid-area:brand;display:flex;align-items:center;gap:9px;white-space:nowrap;font-size:19px!important;font-weight:800;letter-spacing:-.7px}.brand svg{width:29px;height:29px;flex:0 0 auto;padding:5px;border-radius:9px;color:var(--ac);background:color-mix(in srgb,var(--ac) 12%,transparent)}.brand span{color:var(--ac)}
-nav{grid-area:nav;display:flex;gap:4px;align-items:center;min-width:0;max-width:100%;overflow-x:auto;overscroll-behavior-x:contain;scrollbar-width:none}nav::-webkit-scrollbar{display:none}
-nav button{flex:0 0 auto;border:1px solid transparent;background:transparent;color:var(--mut);border-radius:10px;padding:9px 12px;min-height:38px;font-size:12px;font-weight:700;white-space:nowrap;cursor:pointer;transition:background .16s,color .16s,border-color .16s}
-nav button:hover{background:color-mix(in srgb,var(--ac) 8%,transparent);color:var(--tx)}nav button.on{background:color-mix(in srgb,var(--ac) 12%,transparent);border-color:color-mix(in srgb,var(--ac) 18%,transparent);color:var(--ac)}
-.header-actions{grid-area:actions;display:flex;align-items:center;justify-content:flex-end;flex-wrap:wrap;gap:6px;min-width:0}.header-actions>span{max-width:175px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--mut);font-size:12px!important;font-weight:650}
-main{width:min(calc(100% - 48px),1320px);max-width:1320px;margin:0 auto;padding:clamp(22px,3vw,38px) 0 54px}
-h1{margin:4px 0 22px;font-size:clamp(24px,2.8vw,33px);line-height:1.2;letter-spacing:-1px;font-weight:800;overflow-wrap:anywhere}h1 b{font-weight:800}h1 b span{color:var(--ac)!important}
-h2{margin:0 0 13px;font-size:16px;line-height:1.35;letter-spacing:-.3px;font-weight:750}h3{font-size:14px;margin:0 0 8px}p{margin:8px 0 11px}ul{padding-left:20px;margin:7px 0}li{margin:4px 0}.mut{color:var(--mut)}.err{color:var(--er);font-size:13px;font-weight:650;overflow-wrap:anywhere}a{color:var(--ac);text-underline-offset:3px}code{font-family:ui-monospace,SFMono-Regular,Consolas,monospace;font-size:11px;color:var(--mut);overflow-wrap:anywhere;word-break:break-word}
-.card,.stat{min-width:0;background:var(--card);border:1px solid var(--bd);border-radius:var(--radius);box-shadow:var(--shadow-sm)}.card{padding:clamp(16px,2vw,25px);margin:0 0 17px}.card h2{display:flex;align-items:center;gap:8px}.card p:last-child{margin-bottom:0}
-.grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:13px;margin-bottom:18px}.stat{position:relative;overflow:hidden;min-height:116px;padding:19px 17px}.stat:before{content:"";position:absolute;left:0;right:0;top:0;height:3px;background:linear-gradient(90deg,var(--ac),var(--ac2))}.stat b{display:block;margin:3px 0 7px;font-size:clamp(27px,3vw,35px);line-height:1.12;letter-spacing:-1.2px;font-weight:800}.stat span{display:block;color:var(--mut);font-size:11px;font-weight:750;letter-spacing:.035em}
-.two{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));align-items:start;gap:17px}.two>*{min-width:0}.row{display:flex;align-items:center;flex-wrap:wrap;gap:9px;margin:0 0 12px}.row h2{margin:0 auto 0 0}.row>*{min-width:0}
-.btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;min-height:40px;padding:9px 13px;border:1px solid var(--bd);border-radius:11px;background:var(--card);color:var(--tx);font-size:12px;font-weight:750;text-align:center;text-decoration:none;white-space:normal;cursor:pointer;transition:transform .16s,box-shadow .16s,background .16s,border-color .16s}.btn:hover:not(:disabled){transform:translateY(-1px);box-shadow:var(--shadow-sm);border-color:color-mix(in srgb,var(--ac) 38%,var(--bd))}.btn:active:not(:disabled){transform:translateY(0)}.btn.p{background:linear-gradient(135deg,var(--ac),#7665ef);border-color:transparent;color:#fff;box-shadow:0 5px 12px color-mix(in srgb,var(--ac) 20%,transparent)}.btn.p:hover:not(:disabled){background:linear-gradient(135deg,var(--ac-hover),#6854df)}.btn.d{background:var(--er);border-color:var(--er);color:#fff}
-input,select,textarea{max-width:100%;min-width:0;min-height:42px;padding:10px 12px;border:1px solid var(--bd);border-radius:11px;background:var(--surface);color:var(--tx);font-size:13px;line-height:1.4}input::placeholder,textarea::placeholder{color:var(--mut);opacity:.88}input[type=radio]{width:17px;height:17px;min-height:0;accent-color:var(--ac);vertical-align:middle}label{display:inline-flex;align-items:center;gap:7px}textarea{width:100%;min-height:108px;resize:vertical;line-height:1.55}input:focus-visible,select:focus-visible,textarea:focus-visible,.btn:focus-visible,nav button:focus-visible,a:focus-visible,.drop:focus-within{outline:3px solid color-mix(in srgb,var(--ac) 42%,transparent);outline-offset:2px}
-.wrap{width:100%;max-width:100%;border:1px solid var(--bd);border-radius:14px;overflow:auto;overscroll-behavior-x:contain;background:var(--card)}table{width:100%;min-width:690px;border-collapse:separate;border-spacing:0;background:var(--card);font-size:12px}th,td{padding:13px 14px;text-align:left;vertical-align:middle;border-bottom:1px solid var(--bd);overflow-wrap:anywhere}th{position:sticky;top:0;background:var(--surface);color:var(--mut);font-size:10px;line-height:1.4;letter-spacing:.08em;text-transform:uppercase;font-weight:800;white-space:nowrap}tr:last-child td{border-bottom:0}tr.k{cursor:pointer;transition:background .14s}tr.k:hover{background:color-mix(in srgb,var(--ac) 5%,var(--card))}tr.k:focus-visible{outline:3px solid color-mix(in srgb,var(--ac) 42%,transparent);outline-offset:-3px}
-.bd{display:inline-flex;align-items:center;justify-content:center;max-width:100%;width:max-content;padding:4px 9px;border:1px solid color-mix(in srgb,currentColor 18%,transparent);border-radius:999px;background:color-mix(in srgb,currentColor 9%,transparent);font-size:10px;line-height:1.3;font-weight:800;white-space:nowrap;letter-spacing:.01em}.Safe,.Low,.online,.Healthy,.Resolved{color:var(--ok)}.Suspicious,.Medium,.stale,.Attention,.Escalated,.Under{color:var(--wa)}.Malicious,.High,.offline,.Atrisk,.At{color:var(--er)}.Pending,.Analyzing{color:var(--ac)}
-.sim{margin:0 0 13px;padding:11px 13px;border:1px solid color-mix(in srgb,var(--wa) 28%,transparent);border-radius:12px;background:color-mix(in srgb,var(--wa) 9%,var(--card));color:var(--tx);font-size:12px;line-height:1.6}.ai{border-left:3px solid var(--ac)}
-.drop{border:1.5px dashed color-mix(in srgb,var(--ac) 48%,var(--bd));border-radius:15px;padding:clamp(22px,5vw,46px);background:color-mix(in srgb,var(--ac) 4%,var(--card));text-align:center;transition:border-color .18s,background .18s}.drop p{margin:0 0 15px;font-weight:750;color:var(--tx)}.drop input{width:min(100%,390px);background:var(--card)}.drop.hv{border-color:var(--ac);background:color-mix(in srgb,var(--ac) 10%,var(--card))}
-.bar{height:9px;min-width:75px;overflow:hidden;border-radius:99px;background:color-mix(in srgb,var(--bd) 80%,transparent)}.bar i{display:block;height:100%;border-radius:99px;background:linear-gradient(90deg,var(--ac),var(--ac2));transition:width .35s}.bar i.indet{width:40%;animation:ind 1.2s ease-in-out infinite}@keyframes ind{0%{margin-left:-40%}100%{margin-left:100%}}
-.chart{display:flex;align-items:flex-end;gap:clamp(4px,1.2vw,13px);height:170px;width:100%;padding:12px 5px 0}.chart>div{flex:1;min-width:0;height:100%;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;gap:6px;color:var(--mut);font-size:11px}.chart i{display:block;width:min(100%,44px);min-height:4px;border-radius:9px 9px 3px 3px;background:linear-gradient(180deg,var(--ac),var(--ac2))}.chart b{font-size:12px;color:var(--tx)}.fe{padding:11px 0;border-bottom:1px solid var(--bd);font-size:12px;line-height:1.6;overflow-wrap:anywhere}.fe:last-child{border-bottom:0}.chip{display:inline-flex;align-items:center;gap:4px;padding:4px 9px;border-radius:99px;background:color-mix(in srgb,var(--ok) 12%,transparent);color:var(--ok);font-size:10px;font-weight:800;vertical-align:middle}.live{display:inline-block;width:7px;height:7px;flex:0 0 auto;border-radius:50%;background:var(--ok);box-shadow:0 0 0 3px color-mix(in srgb,var(--ok) 14%,transparent);animation:pl 1.8s infinite}@keyframes pl{0%,100%{box-shadow:0 0 0 3px color-mix(in srgb,var(--ok) 14%,transparent)}50%{box-shadow:0 0 0 6px color-mix(in srgb,var(--ok) 5%,transparent)}}
-#toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));z-index:60;display:none;max-width:min(92vw,520px);padding:12px 17px;border:1px solid color-mix(in srgb,var(--bd) 75%,transparent);border-radius:13px;background:var(--tx);color:var(--card);box-shadow:var(--shadow);text-align:center;font-size:13px;font-weight:650}
-#rep{position:fixed;inset:0;z-index:50;overflow:auto;padding:clamp(10px,3vw,30px);background:rgba(5,10,22,.7);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)}#rep .card{width:min(100%,920px);margin:0 auto 24px;padding:clamp(16px,3vw,34px)}#rep h1{font-size:clamp(22px,3vw,30px)}#rep .row{position:sticky;top:-1px;z-index:2;padding:5px 0 12px;background:var(--card)}
-.login-main{width:min(calc(100% - 40px),1040px);padding-top:clamp(32px,7vh,78px)}.login-hero{max-width:700px;margin:0 auto 32px;text-align:center}.login-hero h1{margin:13px 0 9px;font-size:clamp(35px,6vw,56px);letter-spacing:-2px}.login-hero h1 span{color:var(--ac)!important}.login-hero>p{max-width:610px;margin:8px auto;color:var(--mut)}.eyebrow{display:inline-flex;align-items:center;gap:8px;color:var(--ac);font-size:10px;font-weight:800;letter-spacing:.12em;text-transform:uppercase}.login-grid{gap:18px}.login-card{position:relative;display:flex;flex-direction:column;min-height:310px;padding:clamp(20px,3vw,30px);overflow:hidden}.login-card:after{content:"";position:absolute;top:0;right:0;width:120px;height:120px;border-radius:0 0 0 100%;background:radial-gradient(circle at top right,color-mix(in srgb,var(--ac) 12%,transparent),transparent 68%);pointer-events:none}.choice-icon{display:grid;place-items:center;width:48px;height:48px;margin-bottom:19px;border:1px solid color-mix(in srgb,var(--ac) 18%,var(--bd));border-radius:15px;background:color-mix(in srgb,var(--ac) 9%,var(--card));color:var(--ac);font-size:20px;font-weight:800}.choice-icon svg{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}.admin-icon{color:var(--ac2);background:color-mix(in srgb,var(--ac2) 9%,var(--card));border-color:color-mix(in srgb,var(--ac2) 18%,var(--bd))}.login-card .eyebrow{font-size:9px}.login-card h2{margin:7px 0 9px;font-size:21px;letter-spacing:-.5px}.login-card>p{color:var(--mut);max-width:430px}.account-meta{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:18px 0 17px;padding:11px 12px;border:1px solid var(--bd);border-radius:11px;background:var(--surface);font-size:12px}.account-meta span{color:var(--mut)}.login-card .btn{width:100%;margin-top:auto;min-height:44px}.footer-note{margin:24px 0;text-align:center;font-size:12px}
-::selection{background:color-mix(in srgb,var(--ac) 25%,transparent)}
-@media(max-width:1120px){.app-header{grid-template-columns:auto minmax(0,1fr);grid-template-areas:"brand actions" "nav nav";gap:9px 14px}.app-header nav{width:100%;justify-content:flex-start}.app-header .header-actions{margin:0!important}.grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
-@media(max-width:760px){main{width:calc(100% - 30px);padding-top:23px}.app-header{padding:10px 15px;gap:8px 10px}.brand{font-size:17px!important}.brand svg{width:27px;height:27px}.header-actions{gap:5px}.header-actions .btn{min-height:34px;padding:7px 9px;font-size:11px}.header-actions>span{max-width:100%;font-size:11px!important}.app-header nav button{padding:8px 11px}.two{grid-template-columns:minmax(0,1fr);gap:14px}.grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.stat{min-height:102px;padding:16px 15px}.stat b{font-size:28px}.stat span{font-size:10px}.card{padding:17px;border-radius:15px}.row input:not([type=radio]),.row select{flex:1 1 155px;width:auto}.login-main{width:calc(100% - 30px);padding-top:35px}.login-grid{gap:13px}.login-card{min-height:0}.chart{height:155px}.demo{font-size:10px}}
-@media(max-width:600px){
-  html{scroll-padding-top:12px}.app-header{position:relative;grid-template-columns:minmax(0,1fr);grid-template-areas:"brand" "actions" "nav";gap:9px;padding:11px 12px}.brand{justify-self:start}.header-actions{width:100%;justify-content:flex-start;display:flex;flex-wrap:wrap}.header-actions>span{flex:1 1 100%;max-width:none;margin:0 0 2px}.header-actions .btn{flex:1 1 auto;min-width:0}.app-header nav{margin:0 -1px;width:calc(100% + 2px);padding:1px 0 3px;gap:3px}.app-header nav button{padding:8px 10px;min-height:36px;font-size:11px}
-  main{width:calc(100% - 24px);padding-top:20px}.login-main{width:calc(100% - 26px);padding-top:32px}.login-hero{margin-bottom:24px}.login-hero h1{letter-spacing:-1.4px}.login-hero>p{font-size:13px}.login-card{padding:20px}.login-card h2{font-size:19px}.card{padding:15px;margin-bottom:13px}.row{gap:7px}.row .btn{flex:0 0 auto}.row input:not([type=radio]),.row select{flex:1 1 100%;width:100%}.drop{padding:24px 13px}.drop input{width:100%}.grid{gap:9px}.stat{padding:14px 12px;min-height:94px}.stat:before{left:12px;right:12px}.stat b{font-size:26px}.chart{gap:4px;padding-inline:0}.chart>div{font-size:10px}.fe{font-size:11px}
-  /* Turn dense tables into labelled, readable cards on narrow screens. */
-  .wrap{overflow:visible;border:0;background:transparent;border-radius:0}.wrap table{display:block;width:100%;min-width:0;border:0;background:transparent}.wrap tbody{display:block;width:100%}.wrap tr:first-child{display:none}.wrap tr:not(:first-child){display:block;width:100%;margin:0 0 11px;padding:3px 13px;border:1px solid var(--bd);border-radius:13px;background:var(--card);box-shadow:var(--shadow-sm)}.wrap tr.k{cursor:pointer}.wrap tr.k:focus-visible{outline:3px solid color-mix(in srgb,var(--ac) 42%,transparent);outline-offset:2px}.wrap td{display:grid;grid-template-columns:minmax(88px,.72fr) minmax(0,1.28fr);align-items:start;gap:9px;width:100%;padding:10px 0;border-bottom:1px solid var(--bd);font-size:12px}.wrap td:before{content:attr(data-label);color:var(--mut);font-size:9px;line-height:1.5;letter-spacing:.065em;font-weight:800;text-transform:uppercase;overflow-wrap:anywhere}.wrap td:last-child{border-bottom:0}.wrap td[colspan]{display:block;padding:12px 0;border:0}.wrap td[colspan]:before{content:none}.wrap td .row{margin:0}.wrap td .btn{min-height:34px;padding:7px 10px}
-  #rep{padding:6px}#rep .card{padding:15px}#rep .row{position:static;display:flex;flex-wrap:wrap}#rep .row .btn{flex:1 1 auto}
-}
-@media(max-width:360px){main{width:calc(100% - 18px)}.grid{gap:7px}.stat{padding:13px 10px}.stat b{font-size:24px}.stat span{font-size:9px}.btn{padding:8px 10px}.wrap td{grid-template-columns:minmax(76px,.7fr) minmax(0,1.3fr);gap:7px}}
-@media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
-@media print{body{background:#fff!important;color:#111!important}.demo,body>#app,body>.app-header{display:none!important}#rep{display:block!important;position:static;overflow:visible;padding:0;background:#fff!important;backdrop-filter:none!important}#rep .card{width:100%;padding:0;margin:0;border:0!important;box-shadow:none!important;background:#fff!important;color:#111!important}#rep .row{position:static;background:#fff!important}.np{display:none!important}.mut,code{color:#333!important}}
-</style>
-</head><body>
-<div class="demo">DEMO MODE — all accounts, endpoints and analysis results are simulated. No real files are executed or scanned.</div>
-<div id="app"></div><div id="rep" hidden role="dialog" aria-modal="true" aria-label="Investigation report"></div><div id="toast" role="status" aria-live="polite" aria-atomic="true"></div>
-<script>
-const KEY="chx_v1",$=s=>document.querySelector(s),RK={Low:1,Medium:2,High:3};
-const esc=s=>String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
-const now=()=>new Date().toISOString(),ago=m=>new Date(Date.now()-m*6e4).toISOString();
-const fmt=t=>new Date(t).toLocaleString([],{dateStyle:"medium",timeStyle:"short"});
-const uid=()=>Math.random().toString(36).slice(2,9),sleep=ms=>new Promise(r=>setTimeout(r,ms));
-const cls=s=>String(s).split(" ")[0].replace(" ","");
-const badge=s=>`<span class="bd ${cls(s)}">${esc(s)}</span>`;
-function hex(seed,n=64){let x=(seed*2654435761)>>>0,o="";while(o.length<n){x=(x*1664525+1013904223)>>>0;o+=x.toString(16).padStart(8,"0")}return o.slice(0,n)}
-const USERS=[{id:"u-emp",name:"Priya Nair",role:"employee"},{id:"u-emp2",name:"Rahul Shah",role:"employee"},{id:"u-adm",name:"Arjun Mehta",role:"admin"}];
-const uname=id=>(USERS.find(u=>u.id===id)||{}).name||id;
-const PROF={
-low:{risk:"Low",arch:"x64 (AMD64)",secs:[[".text",6.1,48],[".rdata",4.8,20],[".data",3.2,6],[".rsrc",5.1,12]],imp:["KERNEL32.dll!CreateFileW","USER32.dll!MessageBoxW","KERNEL32.dll!ReadFile"],ind:["Normal section layout","No packer signature found","Imports consistent with a GUI utility"],yara:[],
-ai:{sum:"The sample shows a conventional PE layout with moderate entropy and ordinary imports.",exp:"Entropy below 6.5 in every section suggests the code is not packed or encrypted. The imported APIs are common for file and dialog handling.",conf:"Moderate. Static analysis cannot rule out malicious behaviour that only appears at runtime.",steps:["Record a Safe verdict only if the submitter’s context matches the file","Keep the hash on record for future threat-intel lookups"],ev:["Section entropy","Import table","YARA: no matches"]}},
-mid:{risk:"Medium",arch:"x86 (I386)",secs:[[".text",6.9,16],["UPX0",0,0],["UPX1",7.4,220],[".rsrc",4.2,8]],imp:["KERNEL32.dll!VirtualAlloc","KERNEL32.dll!GetProcAddress","KERNEL32.dll!LoadLibraryA"],ind:["UPX-style section names","High-entropy section (7.4)","Minimal import table (typical of packed binaries)"],yara:["Packed_UPX_Generic"],
-ai:{sum:"The file appears packed, which hides its real code from static inspection.",exp:"Packing is used by both legitimate software and malware. The tiny import table and dynamic API resolution (GetProcAddress) reduce visibility, so intent is unclear.",conf:"Low to moderate. Packing alone is not proof of malice.",steps:["Obtain the original installer or vendor hash for comparison","Escalate for sandboxed dynamic analysis in an isolated lab","Do not run the file on a production endpoint"],ev:["Entropy 7.4 in UPX1","Import table size","YARA: Packed_UPX_Generic"]}},
-high:{risk:"High",arch:"x64 (AMD64)",secs:[[".text",7.7,96],[".data",6.9,12],[".rsrc",7.2,40]],imp:["KERNEL32.dll!VirtualAllocEx","KERNEL32.dll!WriteProcessMemory","KERNEL32.dll!CreateRemoteThread","WININET.dll!InternetOpenUrlA","ADVAPI32.dll!RegSetValueExW"],ind:["Process-injection API combination","Network download capability","Registry Run-key persistence strings","Very high entropy in .text (7.7)"],yara:["Susp_ProcessInjection_APIs","Susp_Persistence_RunKey"],
-ai:{sum:"Several indicators together resemble a loader or injector with persistence.",exp:"VirtualAllocEx, WriteProcessMemory and CreateRemoteThread are the classic injection chain. Combined with URL download APIs and Run-key strings, this pattern is commonly seen in malware droppers.",conf:"Moderate to high based on static evidence, though these APIs can appear in legitimate debugging or security tools.",steps:["Isolate the submitting endpoint pending review","Search endpoint telemetry for the same SHA-256","Block the hash and escalate to incident response if confirmed"],ev:["Injection API chain","Run-key strings","Entropy 7.7","YARA: 2 rules matched"]}}};
-function mkCase(n,name,size,by,m,p,status,verdict,expl,seedN){const pr=JSON.parse(JSON.stringify(PROF[p]));return{id:"CHX-2026-"+String(n).padStart(4,"0"),fileName:name,size,sha256:hex(seedN||n),by,submittedAt:ago(m),status,verdict:verdict||null,decision:expl||"",decidedBy:verdict?"u-adm":null,decidedAt:verdict?ago(m-30):null,analysis:pr,real:false}}
-function seed(){const c=[mkCase(1,"invoice_viewer.exe",412e3,"u-emp",4300,"low","Resolved","Safe","No malicious indicators were found by the available static analysis. This is not a guarantee the file is harmless."),
-mkCase(2,"salary_update.exe",880e3,"u-emp2",2900,"high","Resolved","Malicious","Injection APIs, persistence strings and matching YARA rules support a malicious classification. Endpoint isolated."),
-mkCase(3,"vpn_patch.exe",1.4e6,"u-emp",900,"mid","Escalated","Suspicious","Packed binary. Escalated for dynamic analysis in the lab."),
-mkCase(4,"report_tool.exe",260e3,"u-emp2",240,"mid","Pending Review"),mkCase(5,"update_helper.dll",610e3,"u-emp",75,"high","Pending Review"),mkCase(6,"scanner_setup.exe",2.1e6,"u-emp",30,"low","Under Review")];
-const audit=c.map(x=>({id:uid(),cid:x.id,actor:x.by,text:"Submitted "+x.fileName,at:x.submittedAt}));
-const E=(id,h,os,m,sw,ev,sec)=>({id,host:h,os,hb:ago(m),sw,ev,sec});
-return{cases:c,audit,notes:[{id:uid(),to:"u-emp",cid:"CHX-2026-0001",text:"Case CHX-2026-0001 resolved: Safe",at:ago(4270),read:true},{id:uid(),to:"admin",cid:"CHX-2026-0005",text:"New submission CHX-2026-0005",at:ago(75),read:false}],cn:[],
-eps:[E("EP-1001","FIN-LT-014","Windows 11 23H2",1,["Chrome 126","Office 365","7-Zip 23.01"],["Heartbeat OK","Definition update installed"],"Healthy"),E("EP-1002","HR-DT-007","Windows 10 22H2",3,["Chrome 125","Adobe Reader 24"],["Heartbeat OK","USB storage mounted"],"Attention"),E("EP-1003","DEV-WS-021","Windows 11 23H2",22,["VS Code","Docker Desktop","Git 2.45"],["Heartbeat delayed","Unsigned binary executed"],"Attention"),E("EP-1004","SALES-LT-033","Windows 10 22H2",300,["Chrome 120","Zoom 5.17"],["Heartbeat missed x6","Matched hash of CHX-2026-0002"],"At risk"),E("EP-1005","OPS-SRV-002","Windows Server 2019",2,["SQL Server 2019","IIS 10"],["Heartbeat OK"],"Healthy"),E("EP-1006","EXEC-LT-001","Windows 11 23H2",1500,["Office 365","Teams"],["Device offline since yesterday"],"Healthy")]}}
-let DB;try{DB=JSON.parse(localStorage.getItem(KEY))}catch(e){DB=null}if(!DB||!DB.cases)DB=seed();
-const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(DB))}catch(e){}};
-const S={user:null,view:"login",id:null,q:"",f:"all",sort:"submittedAt|-1",page:1,eq:"",ef:"all",es:"host"};
-const audit=(cid,actor,text)=>DB.audit.push({id:uid(),cid,actor,text,at:now()});
-const notify=(to,cid,text)=>DB.notes.push({id:uid(),to,cid,text,at:now(),read:false});
-const myNotes=()=>DB.notes.filter(n=>n.to===(S.user.role==="admin"?"admin":S.user.id)).sort((a,b)=>b.at.localeCompare(a.at));
-const conn=e=>{const m=(Date.now()-new Date(e.hb))/6e4;return m<5?"online":m<60?"stale":"offline"};
-const toast=t=>{const e=$("#toast");e.textContent=t;e.style.display="block";clearTimeout(toast.t);toast.t=setTimeout(()=>e.style.display="none",2600)};
-function go(v,id){S.view=v;S.id=id||null;S.page=1;render();scrollTo(0,0)}
+<!DOCTYPE html>
+<html lang="en">
 
-/* ---------- views ---------- */
-function loginV(){return`<main class="login-main"><section class="login-hero"><div class="eyebrow"><span class="live"></span> Defensive security workspace</div><h1>Cyber<span>HuntX</span></h1><p>Endpoint visibility. Clear file review. Better decisions.</p><p>Explore a working demonstration of employee submissions and the security operations workflow.</p></section>
-<div class="two login-grid"><section class="card login-card"><div class="choice-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M7 3.75h7l4 4v12.5H7a2 2 0 0 1-2-2V5.75a2 2 0 0 1 2-2Z"/><path d="M14 3.75v4h4M9 13l2 2 4-4"/></svg></div><span class="eyebrow">Endpoint user</span><h2>Employee workspace</h2><p>Submit suspicious Windows files, follow the review process, and see decisions from your security team.</p><div class="account-meta"><span>Demo account</span><strong>Priya Nair</strong></div><button class="btn p" data-a="login" data-r="u-emp">Continue as employee <span aria-hidden="true">→</span></button></section>
-<section class="card login-card"><div class="choice-icon admin-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 3 20 6v5.5c0 4.5-3.2 7.7-8 9.5-4.8-1.8-8-5-8-9.5V6l8-3Z"/><path d="m9 12 2 2 4-4"/></svg></div><span class="eyebrow">Security operations</span><h2>Admin SOC console</h2><p>Review submitted cases, inspect simulated endpoint telemetry, record decisions, and export reports.</p><div class="account-meta"><span>Demo account</span><strong>Arjun Mehta</strong></div><button class="btn p" data-a="login" data-r="u-adm">Continue as analyst <span aria-hidden="true">→</span></button></section></div>
-<p class="mut footer-note">Demo sessions only · No credentials are used or stored · No files are executed</p></main>`}
-function shell(inner){const ad=S.user.role==="admin";const nav=ad?[["overview","Overview"],["queue","Review queue"],["endpoints","Endpoints"],["reports","Reports"],["notes","Notifications"]]:[["dash","Dashboard"],["submit","Submit file"],["cases","My cases"],["notes","Notifications"]];
-const un=myNotes().filter(n=>!n.read).length;
-return`<header class="app-header"><b class="brand"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/><path d="M9 12l2 2 4-4"/></svg>Cyber<span>HuntX</span></b><nav aria-label="Primary navigation">${nav.map(n=>`<button class="${S.view===n[0]?"on":""}" ${S.view===n[0]?'aria-current="page"':""} data-a="go" data-v="${n[0]}">${n[1]}${n[0]==="notes"&&un?" ("+un+")":""}</button>`).join("")}</nav>
-<div class="row header-actions" style="margin:0"><span title="Signed in as ${esc(S.user.name)}">${esc(S.user.name)} · ${ad?"Admin":"Employee"}</span>${ad?`<button class="btn" data-a="reset">Reset demo</button>`:""}<button class="btn" data-a="theme" title="Toggle light or dark mode">${isDark()?"☀ Light":"☾ Dark"}</button><button class="btn" data-a="switch">${ad?"Employee view":"Admin view"}</button><button class="btn" data-a="logout">Log out</button></div></header><main>${inner}</main>`}
-function stats(list){return{t:list.length,p:list.filter(c=>c.status==="Pending Review"||c.status==="Under Review").length,s:list.filter(c=>c.verdict==="Suspicious").length,m:list.filter(c=>c.verdict==="Malicious").length,r:list.filter(c=>c.status==="Resolved").length}}
-const statGrid=(s,l)=>`<div class="grid">${[["Total",s.t],[l||"Pending review",s.p],["Suspicious",s.s],["Malicious",s.m],["Resolved",s.r]].map(x=>`<div class="stat"><b>${x[1]}</b><span>${x[0]}</span></div>`).join("")}</div>`;
-function caseRows(list,admin){if(!list.length)return`<tr><td colspan="6" class="mut">No cases match.</td></tr>`;
-return list.map(c=>`<tr class="k" data-a="go" data-v="case" data-id="${c.id}"><td><code>${c.id}</code></td><td>${esc(c.fileName)}</td>${admin?`<td>${esc(uname(c.by))}</td>`:""}<td>${fmt(c.submittedAt)}</td><td>${badge(c.status)}</td><td>${c.verdict?badge(c.verdict):'<span class="mut">—</span>'}${admin?" "+badge(c.analysis.risk):""}</td></tr>`).join("")}
-const caseTable=(list,admin)=>`<div class="wrap"><table><tr><th>Case</th><th>File</th>${admin?"<th>Submitted by</th>":""}<th>Submitted</th><th>Status</th><th>${admin?"Verdict / risk":"Decision"}</th></tr>${caseRows(list,admin)}</table></div>`;
-function dashV(){const l=DB.cases.filter(c=>c.by===S.user.id).sort((a,b)=>b.submittedAt.localeCompare(a.submittedAt));
-return`<h1>Welcome, ${esc(S.user.name.split(" ")[0])}</h1>${statGrid(stats(l),"Awaiting review")}<div class="card"><div class="row"><h2 style="margin:0">Recent submissions</h2><button class="btn p" data-a="go" data-v="submit">Submit a file</button></div>${caseTable(l.slice(0,5),false)}</div>
-<p class="mut">The security decision on every file is made by an administrator. You cannot mark a file safe yourself.</p>`}
-function submitV(){return`<h1>Submit a file for review</h1><div class="card"><div class="drop" id="drop"><p>Drag and drop a Windows executable here (.exe, .dll, .sys, .scr; max 10 MB)</p><input type="file" id="fi" accept=".exe,.dll,.sys,.scr" aria-label="Choose a Windows executable or library for review"></div>
-<p id="uerr" class="err"></p><div id="up" hidden><div class="bar"><i id="pb" style="width:0"></i></div><p id="pt" class="mut"></p></div></div>
-<p class="mut">Files are only read in your browser to compute a SHA-256 hash. They are never executed, uploaded to a server, or sent to public analysis services. Extension checks are preliminary validation only. Analysis results in this demo are simulated.</p>`}
-function listV(){const l=DB.cases.filter(c=>c.by===S.user.id).sort((a,b)=>b.submittedAt.localeCompare(a.submittedAt));return`<h1>My cases</h1><div class="card">${caseTable(l,false)}</div>`}
-function notesV(){DB.notes.forEach(n=>{if(myNotes().includes(n))n.read=true});save();const l=myNotes();return`<h1>Notifications</h1><div class="card">${l.length?l.map(n=>`<p><b>${fmt(n.at)}</b> — <a href="#" data-a="go" data-v="case" data-id="${n.cid}">${esc(n.text)}</a></p>`).join(""):'<p class="mut">No notifications.</p>'}</div>`}
-function overviewV(){const s=stats(DB.cases);const vs=["Safe","Suspicious","Malicious"].map(v=>[v,DB.cases.filter(c=>c.verdict===v).length]),mx=Math.max(1,...vs.map(x=>x[1]));
-const eo=DB.eps.map(conn);const rec=DB.audit.slice().sort((a,b)=>b.at.localeCompare(a.at)).slice(0,6);
-return`<h1>Security overview</h1>${statGrid(s)}<div class="two"><div class="card"><h2>Verdict distribution</h2>${vs.map(v=>`<div class="row"><span style="width:90px">${v[0]}</span><div class="bar" style="flex:1"><i class="${v[0]}" style="width:${v[1]/mx*100}%;background:currentColor"></i></div><b>${v[1]}</b></div>`).join("")}</div>
-<div class="card"><h2>Endpoints</h2><p>${["online","stale","offline"].map(k=>badge(k)+" "+eo.filter(x=>x===k).length).join(" &nbsp; ")}</p><button class="btn" data-a="go" data-v="endpoints">Open inventory</button></div></div>
-<div class="two"><div class="card"><h2>Submissions · last 7 days</h2>${weekChart()}</div><div class="card"><h2><span class="live"></span>Live telemetry feed</h2><div id="live">${feedHTML()}</div></div></div><div class="card"><h2>Recent activity</h2>${rec.map(a=>`<p><span class="mut">${fmt(a.at)}</span> · <code>${a.cid}</code> · ${esc(a.text)}</p>`).join("")}</div>`}
-function qList(){const [k,d]=S.sort.split("|");let l=DB.cases.filter(c=>(S.f==="all"||c.status===S.f)&&(c.id+c.fileName+c.sha256+uname(c.by)).toLowerCase().includes(S.q.toLowerCase()));
-l.sort((a,b)=>{let x=a[k],y=b[k];if(k==="risk"){x=RK[a.analysis.risk];y=RK[b.analysis.risk]}return(x>y?1:x<y?-1:0)*d});return l}
-function qTable(){const l=qList(),pc=Math.max(1,Math.ceil(l.length/5));if(S.page>pc)S.page=pc;return caseTable(l.slice((S.page-1)*5,S.page*5),true)+`<div class="row" style="margin-top:10px"><button class="btn" data-a="pg" data-d="-1" ${S.page<=1?"disabled":""}>Previous</button><span class="mut">Page ${S.page} of ${pc} · ${l.length} cases</span><button class="btn" data-a="pg" data-d="1" ${S.page>=pc?"disabled":""}>Next</button></div>`}
-function queueV(){return`<h1>Review queue</h1><div class="card"><div class="row"><input data-f="q" aria-label="Search cases by case ID, file, hash, or user" placeholder="Search case, file, hash, user" value="${esc(S.q)}"><select data-f="f" aria-label="Filter review queue by status">${["all","Pending Review","Under Review","Escalated","Resolved"].map(o=>`<option ${S.f===o?"selected":""} value="${o}">${o==="all"?"All statuses":o}</option>`).join("")}</select>
-<select data-f="sort" aria-label="Sort review queue">${[["submittedAt|-1","Newest first"],["submittedAt|1","Oldest first"],["risk|-1","Highest risk"],["fileName|1","File name"]].map(o=>`<option ${S.sort===o[0]?"selected":""} value="${o[0]}">${o[1]}</option>`).join("")}</select></div><div id="tbl">${qTable()}</div></div>`}
-function analysisV(c){if(c.status==="Analyzing")return`<div class="sim">Simulated analysis in progress. Findings will appear shortly.</div><div class="bar"><i class="indet"></i></div>`;const a=c.analysis;return`<div class="sim">SIMULATED ANALYSIS — predefined sample findings for demonstration. This is not a real scan of the submitted file.</div>
-<p>Architecture: <b>${a.arch}</b> · Risk: ${badge(a.risk)}</p>
-<div class="wrap"><table><tr><th>Section</th><th>Entropy</th><th>Size (KB)</th></tr>${a.secs.map(s=>`<tr><td>${s[0]}</td><td><div class="row" style="margin:0"><div class="bar" style="width:120px"><i style="width:${s[1]/8*100}%;background:${s[1]>7?"var(--er)":"var(--ac)"}"></i></div>${s[1].toFixed(1)}</div></td><td>${s[2]}</td></tr>`).join("")}</table></div>
-<h2 style="margin-top:12px">Static indicators</h2><ul>${a.ind.map(i=>`<li>${esc(i)}</li>`).join("")}</ul>
-<h2>Notable imports</h2><ul>${a.imp.map(i=>`<li><code>${esc(i)}</code></li>`).join("")}</ul>
-<h2>YARA matches (sample)</h2>${a.yara.length?`<ul>${a.yara.map(i=>`<li><code>${i}</code></li>`).join("")}</ul>`:'<p class="mut">No rules matched.</p>'}
-<p class="mut">Static analysis cannot prove a file is safe. Planned engine: pefile, Capstone, YARA.</p>`}
-function aiV(c){if(c.status==="Analyzing")return"";const a=c.analysis.ai;return`<div class="card ai"><h2>AI-assisted explanation</h2><div class="sim">MOCK explanation (planned: local llama.cpp, Qwen 2.5 Coder 7B Q4_K_M). Model output is advisory, not a verified finding. The analyst makes the decision.</div>
-<p><b>Summary:</b> ${a.sum}</p><p><b>Why it matters:</b> ${a.exp}</p><p><b>Confidence:</b> ${a.conf}</p><p><b>Suggested defensive steps:</b></p><ul>${a.steps.map(s=>`<li>${s}</li>`).join("")}</ul><p class="mut">Evidence used: ${a.ev.join(" · ")}</p></div>`}
-function caseV(){const c=DB.cases.find(x=>x.id===S.id);if(!c)return`<p>Case not found.</p>`;const ad=S.user.role==="admin";
-if(!ad&&c.by!==S.user.id)return`<p class="err">You do not have access to this case.</p>`;
-const meta=`<div class="card"><h2>File metadata</h2><p><b>${esc(c.fileName)}</b> · ${(c.size/1024).toFixed(0)} KB</p><p>SHA-256 ${c.hashComputed?"(computed in browser)":(c.real?"(hash unavailable in this browser)": "(sample value)")} :<br><code>${c.sha256}</code></p><p>Submitted by ${esc(uname(c.by))} on ${fmt(c.submittedAt)}</p></div>`;
-const dec=c.verdict?`<div class="card"><h2>Administrator decision</h2><p>${badge(c.verdict)} by ${esc(uname(c.decidedBy))} on ${fmt(c.decidedAt)}</p><p>${esc(c.decision)}</p>${c.verdict==="Safe"?'<p class="mut">“Safe” means no malicious indicators were identified by the available analysis. It does not guarantee the file is harmless.</p>':""}</div>`:`<div class="card"><h2>Decision</h2><p class="mut">Status: ${c.status}. An administrator will review this file.</p></div>`;
-const back=`<button class="btn" data-a="go" data-v="${ad?"queue":"cases"}">← Back</button>`;
-if(!ad)return`<div class="row">${back}</div><h1>Case ${c.id} ${badge(c.status)}</h1>${dec}${meta}<div class="card"><h2>Analysis summary</h2>${analysisV(c)}</div>`;
-const notes=DB.cn.filter(n=>n.cid===c.id),au=DB.audit.filter(a=>a.cid===c.id).sort((a,b)=>a.at.localeCompare(b.at));
-return`<div class="row">${back}<button class="btn p" data-a="report" data-id="${c.id}">Export report</button></div><h1>Case ${c.id} ${badge(c.status)} ${c.verdict?badge(c.verdict):""}</h1>${meta}<div class="card">${analysisV(c)}</div>${aiV(c)}
-<div class="card"><h2>Investigation notes</h2>${notes.map(n=>`<p><b>${esc(uname(n.by))}</b> <span class="mut">${fmt(n.at)}</span><br>${esc(n.text)}</p>`).join("")||'<p class="mut">No notes yet.</p>'}<textarea id="nt" aria-label="Investigation note" placeholder="Add an investigation note"></textarea><p><button class="btn" data-a="note" data-id="${c.id}">Add note</button></p></div>
-<div class="card"><h2>Record security decision</h2><div class="row">${["Safe","Suspicious","Malicious"].map(v=>`<label><input type="radio" name="vd" value="${v}" ${c.verdict===v?"checked":""}> ${v}</label>`).join("")}</div><textarea id="ex" aria-label="Decision explanation for employee" placeholder="Explanation shown to the employee (min. 10 characters)">${esc(c.decision)}</textarea><p id="derr" class="err"></p>
-<button class="btn p" data-a="decide" data-id="${c.id}">Record decision and resolve</button> <button class="btn" data-a="escalate" data-id="${c.id}">Escalate</button></div>
-${dec}<div class="card"><h2>Investigation history</h2>${au.map(a=>`<p><span class="mut">${fmt(a.at)}</span> · ${esc(uname(a.actor))}: ${esc(a.text)}</p>`).join("")}</div>`}
-function epList(){let l=DB.eps.filter(e=>(e.id+e.host+e.os).toLowerCase().includes(S.eq.toLowerCase())&&(S.ef==="all"||conn(e)===S.ef));return l.sort((a,b)=>S.es==="hb"?b.hb.localeCompare(a.hb):a.host.localeCompare(b.host))}
-const epTable=()=>`<div class="wrap"><table><tr><th>ID</th><th>Hostname</th><th>OS</th><th>Last heartbeat</th><th>Connection</th><th>Security</th></tr>${epList().map(e=>`<tr class="k" data-a="go" data-v="ep" data-id="${e.id}"><td>${e.id}</td><td>${e.host}</td><td>${e.os}</td><td>${rel(e.hb)}</td><td>${badge(conn(e))}</td><td>${badge(e.sec.replace(" ",""))}</td></tr>`).join("")||'<tr><td colspan="6" class="mut">No endpoints match.</td></tr>'}</table></div>`;
-function epsV(){return`<h1>Endpoint inventory <span class="chip"><span class="live"></span>Live</span></h1><div class="sim">Simulated telemetry — not real employee machines. Online: heartbeat under 5 min · Stale: under 60 min · Offline: older.</div><div class="card"><div class="row"><input data-f="eq" aria-label="Search endpoints by ID, hostname, or operating system" placeholder="Search endpoints" value="${esc(S.eq)}"><select data-f="ef" aria-label="Filter endpoints by connection status">${["all","online","stale","offline"].map(o=>`<option ${S.ef===o?"selected":""}>${o}</option>`).join("")}</select><select data-f="es" aria-label="Sort endpoint inventory"><option value="host" ${S.es==="host"?"selected":""}>Sort by hostname</option><option value="hb" ${S.es==="hb"?"selected":""}>Sort by heartbeat</option></select></div><div id="tbl">${epTable()}</div></div>`}
-function epV(){const e=DB.eps.find(x=>x.id===S.id);const hist=[0,1,2,3,4].map(i=>new Date(new Date(e.hb)-i*5*6e4).toISOString());
-return`<div class="row"><button class="btn" data-a="go" data-v="endpoints">← Back</button><button class="btn" data-a="hb" data-id="${e.id}">Simulate heartbeat</button><button class="btn d" data-a="iso" data-id="${e.id}">Isolate endpoint (simulated)</button></div><h1>${e.host} ${badge(conn(e))} ${badge(e.sec.replace(" ",""))}</h1><div class="sim">Simulated telemetry for demonstration.</div>
-<div class="two"><div class="card"><h2>Installed software</h2><ul>${e.sw.map(s=>`<li>${s}</li>`).join("")}</ul><p class="mut">${e.id} · ${e.os}</p></div><div class="card"><h2>Recent events</h2><ul>${e.ev.map(s=>`<li>${s}</li>`).join("")}</ul></div></div>
-<div class="card"><h2>Telemetry history</h2>${hist.map(h=>`<p class="mut">${fmt(h)} — heartbeat (simulated)</p>`).join("")}</div>`}
-function reportsV(){const l=DB.cases.slice().sort((a,b)=>b.submittedAt.localeCompare(a.submittedAt));return`<h1>Reports and history</h1><div class="card"><div class="wrap"><table><tr><th>Case</th><th>File</th><th>Verdict</th><th>Decided</th><th></th></tr>${l.map(c=>`<tr><td><code>${c.id}</code></td><td>${esc(c.fileName)}</td><td>${c.verdict?badge(c.verdict):badge(c.status)}</td><td>${c.decidedAt?fmt(c.decidedAt):"—"}</td><td><button class="btn" data-a="report" data-id="${c.id}">Open report</button></td></tr>`).join("")}</table></div></div>`}
-function view(){switch(S.view){case"dash":return dashV();case"submit":return submitV();case"cases":return listV();case"notes":return notesV();case"overview":return overviewV();case"queue":return queueV();case"case":return caseV();case"endpoints":return epsV();case"ep":return epV();case"reports":return reportsV()}return""}
-function labelTables(root=document){root.querySelectorAll(".wrap table").forEach(table=>{const heads=[...table.querySelectorAll("tr:first-child th")].map(th=>th.textContent.trim());table.querySelectorAll("tr:not(:first-child)").forEach(row=>[...row.children].forEach((cell,i)=>{if(cell.tagName==="TD")cell.dataset.label=heads[i]||""}));const wrap=table.closest(".wrap");if(wrap){wrap.setAttribute("role","region");wrap.setAttribute("tabindex","0");wrap.setAttribute("aria-label","Scrollable data table; on small screens rows are presented as labelled cards")}})}
-function render(){$("#app").innerHTML=S.user?shell(view()):loginV();if(S.view==="submit")bindUp();labelTables();
- document.querySelectorAll("tr.k").forEach(row=>{row.setAttribute("tabindex","0");row.setAttribute("role","button");row.addEventListener("keydown",ev=>{if(ev.key==="Enter"||ev.key===" "){ev.preventDefault();row.click()}})})}
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#f4f7fb" />
+  <title>CyberHuntX | Defensive Triage Console</title>
+  <style>
+    :root {
+      --bg: #0a1020;
+      --panel: #101a2d;
+      --panel2: #142139;
+      --line: #263550;
+      --text: #e8eef9;
+      --muted: #91a2bd;
+      --blue: #6e9cff;
+      --cyan: #61ded0;
+      --purple: #aa8cff;
+      --green: #4dd4a6;
+      --amber: #f5bd66;
+      --red: #ff7185;
+      --shadow: 0 18px 50px rgba(0, 0, 0, .23)
+    }
 
-/* ---------- report ---------- */
-function showReport(id){const c=DB.cases.find(x=>x.id===id),notes=DB.cn.filter(n=>n.cid===id),au=DB.audit.filter(a=>a.cid===id);
-const a=c.analysis;$("#rep").hidden=false;$("#rep").innerHTML=`<div class="card"><div class="row np"><button class="btn p" data-a="print">Print / Save as PDF</button><button class="btn" data-a="copyjson" data-id="${id}">Copy JSON</button><button class="btn" data-a="closerep">Close</button></div>
-<h1>CyberHuntX investigation report — ${c.id}</h1><div class="sim">DEMONSTRATION REPORT — analysis findings and AI explanation are simulated, not a real scan.</div>
-<p><b>File:</b> ${esc(c.fileName)} (${(c.size/1024).toFixed(0)} KB)<br><b>SHA-256:</b> <code>${c.sha256}</code><br><b>Submitted:</b> ${fmt(c.submittedAt)} by ${esc(uname(c.by))}<br><b>Status:</b> ${c.status}</p>
-<p><b>Verdict:</b> ${c.verdict||"Not yet decided"} ${c.decidedAt?"("+fmt(c.decidedAt)+" by "+esc(uname(c.decidedBy))+")":""}<br>${esc(c.decision)}</p>
-<h2>Findings (simulated)</h2><p>Risk: ${a.risk} · ${a.arch}</p><ul>${a.ind.map(i=>`<li>${esc(i)}</li>`).join("")}</ul><p>YARA: ${a.yara.join(", ")||"none"}</p><p>Peak entropy: ${Math.max(...a.secs.map(s=>s[1])).toFixed(1)}</p>
-<h2>AI-assisted explanation (mock)</h2><p>${a.ai.sum} ${a.ai.exp}</p><h2>Notes</h2>${notes.map(n=>`<p>${fmt(n.at)} ${esc(uname(n.by))}: ${esc(n.text)}</p>`).join("")||"<p>None.</p>"}
-<h2>Administrator actions</h2>${au.map(x=>`<p>${fmt(x.at)} — ${esc(uname(x.actor))}: ${esc(x.text)}</p>`).join("")}<p class="mut">A Safe verdict does not guarantee a file is harmless.</p></div>`}
+    * {
+      box-sizing: border-box
+    }
 
-/* ---------- upload ---------- */
-function bindUp(){const d=$("#drop"),fi=$("#fi");if(!d)return;d.ondragover=e=>{e.preventDefault();d.classList.add("hv")};d.ondragleave=()=>d.classList.remove("hv");d.ondrop=e=>{e.preventDefault();d.classList.remove("hv");if(e.dataTransfer.files[0])doSubmit(e.dataTransfer.files[0])};fi.onchange=()=>fi.files[0]&&doSubmit(fi.files[0])}
-async function doSubmit(f){const er=$("#uerr");er.textContent="";
-if(!/\.(exe|dll|sys|scr)$/i.test(f.name))return er.textContent="Unsupported type. Allowed: .exe, .dll, .sys, .scr";
-if(f.size===0)return er.textContent="The file is empty.";if(f.size>10*1048576)return er.textContent="File exceeds the 10 MB limit.";
-$("#up").hidden=false;const pb=$("#pb"),pt=$("#pt");pt.textContent="Reading file (never executed)…";pb.style.width="20%";
-let h="unavailable",hashComputed=false;try{if(!globalThis.crypto?.subtle)throw new Error("Web Crypto unavailable");h=[...new Uint8Array(await crypto.subtle.digest("SHA-256",await f.arrayBuffer()))].map(b=>b.toString(16).padStart(2,"0")).join("");hashComputed=true}catch(e){}
-pb.style.width="60%";await sleep(500);pt.textContent=hashComputed?"Hash computed. Queuing simulated analysis…":"Hash unavailable. Queuing simulated analysis…";pb.style.width="90%";await sleep(500);
-const p=["low","mid","high"][parseInt(h.slice(0,2),16)%3||0]||"mid";const n=DB.cases.length+1;
-const c={id:"CHX-2026-"+String(n).padStart(4,"0"),fileName:f.name.replace(/[^\w.\- ]/g,"_"),size:f.size,sha256:h,by:S.user.id,submittedAt:now(),status:"Analyzing",verdict:null,decision:"",decidedBy:null,decidedAt:null,analysis:JSON.parse(JSON.stringify(PROF[p])),real:true,hashComputed};
-DB.cases.push(c);audit(c.id,S.user.id,"Submitted "+c.fileName);save();toast("Submitted as "+c.id+". Simulated analysis running…");go("case",c.id);runAnalysis(c.id)}
+    body {
+      margin: 0;
+      background: radial-gradient(circle at 70% -10%, #17264a 0, #0a1020 40%);
+      color: var(--text);
+      font: 14px/1.5 Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif
+    }
 
-/* ---------- events ---------- */
-document.addEventListener("click",e=>{if(e.target.id==="rep"){$("#rep").hidden=true;return}const t=e.target.closest("[data-a]");if(!t)return;if(t.tagName==="A")e.preventDefault();const d=t.dataset;
-switch(d.a){
-case"login":S.user=USERS.find(u=>u.id===d.r);S.view=S.user.role==="admin"?"overview":"dash";render();break;
-case"theme":setTheme(isDark()?"light":"dark");render();break;case"switch":S.user=USERS.find(u=>u.id===(S.user.role==="admin"?"u-emp":"u-adm"));S.view=S.user.role==="admin"?"overview":"dash";S.id=null;render();break;case"iso":{const x=DB.eps.find(y=>y.id===d.id);x.sec="At risk";x.ev.unshift("Network isolation requested (simulated)");audit("EP",S.user.id,"Isolated "+x.host+" (simulated)");save();render();toast(x.host+" isolated (simulated)");break}case"logout":S.user=null;S.view="login";render();break;
-case"go":if(d.v==="case"&&S.user.role==="admin"){const c=DB.cases.find(x=>x.id===d.id);if(c&&c.status==="Pending Review"){c.status="Under Review";audit(c.id,S.user.id,"Opened case; status set to Under Review");save()}}go(d.v,d.id);break;
-case"pg":S.page+=+d.d;$("#tbl").innerHTML=qTable();labelTables($("#tbl"));break;
-case"note":{const v=$("#nt").value.trim();if(!v)return toast("Write a note first");DB.cn.push({id:uid(),cid:d.id,by:S.user.id,text:v,at:now()});audit(d.id,S.user.id,"Added investigation note");save();render();toast("Note added");break}
-case"decide":{const c=DB.cases.find(x=>x.id===d.id),r=document.querySelector("input[name=vd]:checked"),ex=$("#ex").value.trim();
-if(!r)return $("#derr").textContent="Choose a verdict.";if(ex.length<10)return $("#derr").textContent="Add an explanation of at least 10 characters.";
-Object.assign(c,{verdict:r.value,decision:ex,decidedBy:S.user.id,decidedAt:now(),status:"Resolved"});audit(c.id,S.user.id,"Recorded decision: "+r.value);notify(c.by,c.id,"Case "+c.id+" resolved: "+r.value);save();render();toast("Decision recorded; employee notified");break}
-case"escalate":{const c=DB.cases.find(x=>x.id===d.id);c.status="Escalated";audit(c.id,S.user.id,"Escalated for further investigation");notify(c.by,c.id,"Case "+c.id+" escalated for further investigation");save();render();toast("Case escalated");break}
-case"report":showReport(d.id);break;case"closerep":$("#rep").hidden=true;break;case"print":print();break;
-case"copyjson":{const c=DB.cases.find(x=>x.id===d.id);const j=JSON.stringify({case:c,notes:DB.cn.filter(n=>n.cid===d.id),audit:DB.audit.filter(a=>a.cid===d.id),simulated:true},null,2);(navigator.clipboard?navigator.clipboard.writeText(j):Promise.reject()).then(()=>toast("JSON copied"),()=>toast("Clipboard unavailable"));break}
-case"hb":{DB.eps.find(x=>x.id===d.id).hb=now();save();render();toast("Simulated heartbeat received");break}
-case"reset":if(confirm("Reset all demo data to the seeded state?")){DB=seed();save();go("overview");toast("Demo data reset")}break}});
-document.addEventListener("keydown",e=>{if(e.key==="Escape"&&!$("#rep").hidden){$("#rep").hidden=true}});
-document.addEventListener("input",e=>{const f=e.target.dataset&&e.target.dataset.f;if(!f)return;S[f]=e.target.value;S.page=1;const tb=$("#tbl");if(tb){tb.innerHTML=S.view==="queue"?qTable():epTable();labelTables(tb)}});
-/* ---------- theme, live feed, async analysis ---------- */
-try{const t=localStorage.getItem("chx_theme");if(t)document.documentElement.dataset.theme=t}catch(e){}
-const isDark=()=>{const t=document.documentElement.dataset.theme;return t?t==="dark":matchMedia("(prefers-color-scheme: dark)").matches};
-function setTheme(t){document.documentElement.dataset.theme=t;try{localStorage.setItem("chx_theme",t)}catch(e){}}
-const rel=t=>{const s=Math.max(0,(Date.now()-new Date(t))/1e3);return s<60?Math.floor(s)+"s ago":s<3600?Math.floor(s/60)+"m ago":s<86400?Math.floor(s/3600)+"h ago":fmt(t)};
-const typing=()=>/INPUT|TEXTAREA|SELECT/.test((document.activeElement||{}).tagName||"");
-const POOL=[["HIGH","Unsigned binary executed on DEV-WS-021"],["MED","USB storage mounted on HR-DT-007"],["INFO","Definition update installed on FIN-LT-014"],["INFO","Policy sync complete on OPS-SRV-002"],["MED","Outbound connection to rare domain from SALES-LT-033"],["INFO","Heartbeat received from FIN-LT-014"],["LOW","Failed login burst cleared on HR-DT-007"]];
-const FEED=[];let lastU=null,lastUn=0;
-function pushFeed(){const p=POOL[Math.floor(Math.random()*POOL.length)];FEED.unshift({at:now(),lv:p[0],text:p[1]});if(FEED.length>8)FEED.pop()}
-function feedHTML(){return FEED.map(f=>`<div class="fe">${badge(f.lv==="HIGH"?"High":f.lv==="MED"?"Medium":"Low")} ${esc(f.text)} <span class="mut">· ${rel(f.at)}</span></div>`).join("")+'<p class="mut" style="font-size:12px;margin:8px 0 0">Simulated events for demonstration.</p>'}
-function weekChart(){const d=[...Array(7)].map((_,i)=>{const t=new Date(Date.now()-(6-i)*864e5);return[t.toLocaleDateString([],{weekday:"short"}),DB.cases.filter(c=>new Date(c.submittedAt).toDateString()===t.toDateString()).length]}),m=Math.max(1,...d.map(x=>x[1]));return`<div class="chart">${d.map(x=>`<div><i style="height:${x[1]/m*70}%"></i><b>${x[1]}</b><span>${x[0]}</span></div>`).join("")}</div>`}
-function runAnalysis(id,ms=6000){setTimeout(()=>{const c=DB.cases.find(x=>x.id===id);if(!c||c.status!=="Analyzing")return;c.status="Pending Review";audit(id,"u-adm","Simulated analysis completed (demo)");notify("admin",id,"Analysis complete, ready for review: "+id);notify(c.by,id,"Analysis complete for "+id+". Awaiting analyst review.");save();if(S.user&&!typing())render()},ms)}
-function tick(){["EP-1001","EP-1002","EP-1005"].forEach(id=>{const e=DB.eps.find(x=>x.id===id);if(e)e.hb=now()});pushFeed();if(!S.user)return;
-const un=myNotes().filter(n=>!n.read).length;
-if(lastU!==S.user.id){lastU=S.user.id;lastUn=un}else if(un!==lastUn){if(un>lastUn)toast("🔔 New notification");lastUn=un;if(!typing())render();return}
-const tb=$("#tbl"),lv=$("#live");if(S.view==="endpoints"&&tb&&!typing()){tb.innerHTML=epTable();labelTables(tb)}if(S.view==="overview"&&lv)lv.innerHTML=feedHTML();if(S.view==="ep"&&!typing())render()}
-DB.cases.filter(c=>c.status==="Analyzing").forEach(c=>runAnalysis(c.id,1500));for(let i=0;i<5;i++)pushFeed();setInterval(tick,4000);
-render();
-</script></body></html>
+    button,
+    input,
+    select,
+    textarea {
+      font: inherit
+    }
+
+    button {
+      cursor: pointer
+    }
+
+    .app {
+      min-height: 100vh;
+      display: grid;
+      grid-template-columns: 248px 1fr
+    }
+
+    .sidebar {
+      background: rgba(9, 15, 29, .88);
+      border-right: 1px solid var(--line);
+      padding: 22px 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 24px
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 11px;
+      padding: 0 9px
+    }
+
+    .brandmark {
+      width: 38px;
+      height: 38px;
+      border-radius: 13px;
+      background: linear-gradient(135deg, #73a0ff, #7c69e8);
+      display: grid;
+      place-items: center;
+      color: white;
+      font-size: 21px;
+      box-shadow: 0 8px 25px #5e7ff033
+    }
+
+    .brand strong {
+      display: block;
+      font-size: 16px;
+      letter-spacing: .2px
+    }
+
+    .brand small {
+      display: block;
+      color: var(--muted);
+      font-size: 10px;
+      letter-spacing: 1.6px;
+      text-transform: uppercase
+    }
+
+    .navlabel {
+      font-size: 10px;
+      letter-spacing: 1.7px;
+      color: #71829d;
+      text-transform: uppercase;
+      padding: 0 12px;
+      margin-bottom: 7px
+    }
+
+    .nav {
+      display: grid;
+      gap: 5px
+    }
+
+    .nav button {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      width: 100%;
+      padding: 11px 12px;
+      border: 1px solid transparent;
+      background: transparent;
+      color: #9eacc4;
+      border-radius: 11px;
+      text-align: left;
+      transition: .18s
+    }
+
+    .nav button:hover {
+      background: #15223a;
+      color: #eaf1ff
+    }
+
+    .nav button.active {
+      background: linear-gradient(100deg, #26385c, #192943);
+      border-color: #334c76;
+      color: #fff
+    }
+
+    .nav .ico {
+      font-size: 17px;
+      width: 20px;
+      text-align: center
+    }
+
+    .nav .count {
+      margin-left: auto;
+      border-radius: 8px;
+      background: #763b50;
+      color: #ffd5dc;
+      font-size: 11px;
+      padding: 1px 7px
+    }
+
+    .sidebottom {
+      margin-top: auto
+    }
+
+    .safetybox {
+      padding: 13px;
+      border: 1px solid #284b55;
+      border-radius: 13px;
+      background: #10242d
+    }
+
+    .safetybox .dot {
+      display: inline-block;
+      width: 7px;
+      height: 7px;
+      background: var(--green);
+      border-radius: 50%;
+      margin-right: 7px
+    }
+
+    .safetybox strong {
+      font-size: 12px
+    }
+
+    .safetybox p {
+      color: var(--muted);
+      font-size: 11px;
+      margin: 7px 0 0
+    }
+
+    .main {
+      min-width: 0
+    }
+
+    .topbar {
+      height: 76px;
+      border-bottom: 1px solid var(--line);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 30px;
+      background: #0b1322b8;
+      backdrop-filter: blur(14px);
+      position: sticky;
+      top: 0;
+      z-index: 4
+    }
+
+    .crumb {
+      color: var(--muted);
+      font-size: 12px
+    }
+
+    .topright {
+      display: flex;
+      align-items: center;
+      gap: 10px
+    }
+
+    .role-switch {
+      display: flex;
+      background: #111e32;
+      border: 1px solid var(--line);
+      padding: 4px;
+      border-radius: 11px;
+      gap: 3px
+    }
+
+    .role-switch button {
+      color: #aab8ce;
+      background: transparent;
+      border: 0;
+      border-radius: 8px;
+      padding: 7px 11px;
+      font-size: 12px
+    }
+
+    .role-switch button.active {
+      color: #fff;
+      background: #2b426b
+    }
+
+    .iconbtn,
+    .btn {
+      border: 1px solid var(--line);
+      background: #152238;
+      color: #e9f0ff;
+      border-radius: 10px;
+      padding: 9px 12px
+    }
+
+    .iconbtn {
+      width: 38px;
+      height: 38px;
+      padding: 0;
+      font-size: 16px;
+      position: relative
+    }
+
+    .btn:hover,
+    .iconbtn:hover {
+      border-color: #5574a7;
+      background: #1b2c49
+    }
+
+    .btn.primary {
+      background: linear-gradient(110deg, #487bea, #7066db);
+      border: 0;
+      color: white;
+      box-shadow: 0 7px 18px #526de533
+    }
+
+    .btn.primary:hover {
+      filter: brightness(1.1)
+    }
+
+    .btn.ghost {
+      background: transparent
+    }
+
+    .btn.danger {
+      color: #ffb1bc;
+      border-color: #633847;
+      background: #2b1c2a
+    }
+
+    .btn.small {
+      font-size: 12px;
+      padding: 6px 9px;
+      border-radius: 8px
+    }
+
+    .avatar {
+      width: 34px;
+      height: 34px;
+      border-radius: 11px;
+      background: #263d61;
+      display: grid;
+      place-items: center;
+      font-weight: 700;
+      font-size: 12px
+    }
+
+    .user {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      padding-left: 5px
+    }
+
+    .user strong {
+      display: block;
+      font-size: 12px
+    }
+
+    .user small {
+      display: block;
+      color: var(--muted);
+      font-size: 10px
+    }
+
+    .content {
+      padding: 28px 30px 42px;
+      max-width: 1600px;
+      margin: auto
+    }
+
+    .pagehead {
+      display: flex;
+      justify-content: space-between;
+      gap: 15px;
+      align-items: flex-start;
+      margin-bottom: 23px
+    }
+
+    .eyebrow {
+      font-size: 10px;
+      color: var(--cyan);
+      letter-spacing: 1.8px;
+      text-transform: uppercase;
+      font-weight: 700
+    }
+
+    .pagehead h1 {
+      margin: 5px 0 5px;
+      font-size: 27px;
+      letter-spacing: -.7px
+    }
+
+    .pagehead p {
+      color: var(--muted);
+      margin: 0;
+      max-width: 650px
+    }
+
+    .headactions {
+      display: flex;
+      gap: 8px;
+      align-items: center
+    }
+
+    .demo-banner {
+      border: 1px solid #5a4b2b;
+      background: linear-gradient(100deg, #302715aa, #1b2031aa);
+      padding: 11px 14px;
+      border-radius: 12px;
+      margin-bottom: 20px;
+      color: #f4d79d;
+      display: flex;
+      gap: 10px;
+      align-items: flex-start;
+      font-size: 12px
+    }
+
+    .demo-banner strong {
+      color: #ffe9b9
+    }
+
+    .grid {
+      display: grid;
+      gap: 15px
+    }
+
+    .stats {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      margin-bottom: 18px
+    }
+
+    .card {
+      background: linear-gradient(140deg, #121e32, #101a2b);
+      border: 1px solid var(--line);
+      border-radius: 15px;
+      box-shadow: var(--shadow);
+      min-width: 0
+    }
+
+    .stat {
+      padding: 17px 18px;
+      position: relative;
+      overflow: hidden
+    }
+
+    .stat:after {
+      content: "";
+      position: absolute;
+      width: 95px;
+      height: 95px;
+      border-radius: 50%;
+      background: var(--glow, #709aff);
+      opacity: .07;
+      right: -24px;
+      top: -29px
+    }
+
+    .stathead {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      color: var(--muted);
+      font-size: 12px
+    }
+
+    .staticon {
+      font-size: 18px;
+      color: var(--accent, var(--blue))
+    }
+
+    .statnum {
+      font-size: 29px;
+      font-weight: 750;
+      letter-spacing: -1px;
+      margin-top: 14px
+    }
+
+    .statfoot {
+      font-size: 11px;
+      color: var(--muted);
+      margin-top: 2px
+    }
+
+    .statfoot .positive {
+      color: var(--green)
+    }
+
+    .split {
+      grid-template-columns: minmax(0, 1.6fr) minmax(290px, 1fr);
+      margin-bottom: 18px
+    }
+
+    .cardhead {
+      padding: 17px 19px;
+      border-bottom: 1px solid #26344b;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px
+    }
+
+    .cardhead h2 {
+      font-size: 14px;
+      margin: 0
+    }
+
+    .cardhead p {
+      font-size: 11px;
+      color: var(--muted);
+      margin: 4px 0 0
+    }
+
+    .cardbody {
+      padding: 17px 19px
+    }
+
+    .linkbtn {
+      background: transparent;
+      border: 0;
+      color: #8caeff;
+      font-size: 12px;
+      padding: 4px
+    }
+
+    .chart {
+      height: 174px;
+      display: flex;
+      align-items: end;
+      gap: 11px;
+      padding: 8px 5px 0
+    }
+
+    .baritem {
+      flex: 1;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      justify-content: end;
+      align-items: center;
+      gap: 8px;
+      min-width: 0
+    }
+
+    .bars {
+      height: 137px;
+      width: 100%;
+      display: flex;
+      align-items: end;
+      justify-content: center;
+      gap: 4px;
+      border-bottom: 1px solid #293a54
+    }
+
+    .bar {
+      width: 27%;
+      max-width: 19px;
+      border-radius: 5px 5px 1px 1px;
+      background: linear-gradient(180deg, #6ba4ff, #4c60bd);
+      min-height: 5px
+    }
+
+    .bar.alt {
+      background: linear-gradient(180deg, #5ee1d0, #238d9f)
+    }
+
+    .barlabel {
+      font-size: 10px;
+      color: #8598b6
+    }
+
+    .legend {
+      display: flex;
+      gap: 14px;
+      font-size: 10px;
+      color: var(--muted);
+      margin-top: 15px
+    }
+
+    .legend span:before {
+      content: "";
+      width: 7px;
+      height: 7px;
+      display: inline-block;
+      background: #6ba4ff;
+      border-radius: 2px;
+      margin-right: 5px
+    }
+
+    .legend .l2:before {
+      background: #5ee1d0
+    }
+
+    .statusline {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin: 13px 0
+    }
+
+    .statuscircle {
+      width: 34px;
+      height: 34px;
+      display: grid;
+      place-items: center;
+      border-radius: 11px;
+      background: #172e3b;
+      color: var(--green);
+      flex-shrink: 0
+    }
+
+    .statusline strong {
+      font-size: 12px;
+      display: block
+    }
+
+    .statusline small {
+      font-size: 10px;
+      color: var(--muted)
+    }
+
+    .statusright {
+      margin-left: auto;
+      font-size: 11px;
+      color: var(--green)
+    }
+
+    .divider {
+      height: 1px;
+      background: #25344b;
+      margin: 14px 0
+    }
+
+    .filters {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      align-items: center
+    }
+
+    .field,
+    .select,
+    .textarea {
+      background: #0d1728;
+      color: var(--text);
+      border: 1px solid #2a3b55;
+      border-radius: 9px;
+      padding: 10px 11px;
+      outline: none;
+      min-width: 0
+    }
+
+    .field:focus,
+    .select:focus,
+    .textarea:focus {
+      border-color: #719bff;
+      box-shadow: 0 0 0 3px #719bff20
+    }
+
+    .field.search {
+      width: min(270px, 100%)
+    }
+
+    .select {
+      padding: 9px 11px
+    }
+
+    .tablewrap {
+      overflow: auto
+    }
+
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      min-width: 760px
+    }
+
+    th {
+      font-size: 10px;
+      letter-spacing: .65px;
+      text-transform: uppercase;
+      color: #8495b1;
+      text-align: left;
+      font-weight: 650;
+      background: #101a2b
+    }
+
+    th,
+    td {
+      padding: 13px 15px;
+      border-bottom: 1px solid #243149
+    }
+
+    td {
+      font-size: 12px;
+      color: #d7e1f2
+    }
+
+    tr:last-child td {
+      border-bottom: 0
+    }
+
+    tbody tr:hover {
+      background: #18264066
+    }
+
+    .filecell {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      min-width: 180px
+    }
+
+    .fileicon {
+      width: 34px;
+      height: 36px;
+      background: #1d2e4b;
+      border: 1px solid #314868;
+      border-radius: 8px;
+      display: grid;
+      place-items: center;
+      color: #8bb5ff;
+      font-size: 11px;
+      font-weight: 800
+    }
+
+    .filecell strong {
+      display: block;
+      font-size: 12px
+    }
+
+    .filecell small {
+      display: block;
+      color: var(--muted);
+      font-size: 10px;
+      margin-top: 2px
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 4px 8px;
+      border-radius: 7px;
+      font-size: 10px;
+      font-weight: 700;
+      white-space: nowrap;
+      border: 1px solid transparent
+    }
+
+    .pill:before {
+      content: "";
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      background: currentColor
+    }
+
+    .pill.safe {
+      background: #10332e;
+      border-color: #225a4f;
+      color: #71e1bd
+    }
+
+    .pill.suspicious {
+      background: #392c1c;
+      border-color: #68502b;
+      color: #f6c16f
+    }
+
+    .pill.malicious {
+      background: #3d202d;
+      border-color: #704050;
+      color: #ff8ca2
+    }
+
+    .pill.pending {
+      background: #1b2d48;
+      border-color: #334d72;
+      color: #9fc0ff
+    }
+
+    .pill.analysis {
+      background: #2b2145;
+      border-color: #49396e;
+      color: #c2a7ff
+    }
+
+    .pill.resolved {
+      background: #15332e;
+      border-color: #27574c;
+      color: #7cdbbc
+    }
+
+    .rowactions {
+      display: flex;
+      gap: 5px
+    }
+
+    .tablefoot {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      color: var(--muted);
+      font-size: 11px;
+      padding: 12px 16px;
+      border-top: 1px solid #243149
+    }
+
+    .quickgrid {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      margin-bottom: 18px
+    }
+
+    .quick {
+      padding: 17px;
+      display: flex;
+      gap: 13px;
+      align-items: center;
+      text-align: left;
+      color: var(--text);
+      width: 100%;
+      background: linear-gradient(140deg, #121e32, #101a2b);
+      border: 1px solid var(--line);
+      border-radius: 14px
+    }
+
+    .quick:hover {
+      border-color: #5476aa;
+      transform: translateY(-1px)
+    }
+
+    .quickico {
+      width: 39px;
+      height: 39px;
+      display: grid;
+      place-items: center;
+      border-radius: 12px;
+      background: #1d3050;
+      color: #96b8ff;
+      font-size: 18px
+    }
+
+    .quick strong {
+      display: block;
+      font-size: 12px
+    }
+
+    .quick small {
+      color: var(--muted);
+      font-size: 10px
+    }
+
+    .endpointgrid {
+      grid-template-columns: repeat(3, minmax(0, 1fr))
+    }
+
+    .endpoint {
+      padding: 18px
+    }
+
+    .ephead {
+      display: flex;
+      align-items: center;
+      gap: 10px
+    }
+
+    .epicon {
+      width: 40px;
+      height: 40px;
+      border-radius: 12px;
+      display: grid;
+      place-items: center;
+      background: #1c2d48;
+      font-size: 18px
+    }
+
+    .ephead strong {
+      display: block;
+      font-size: 13px
+    }
+
+    .ephead small {
+      color: var(--muted);
+      font-size: 10px
+    }
+
+    .epstate {
+      margin-left: auto
+    }
+
+    .epmeta {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin: 17px 0
+    }
+
+    .epmeta span {
+      display: block;
+      color: var(--muted);
+      font-size: 10px
+    }
+
+    .epmeta strong {
+      display: block;
+      font-size: 12px;
+      margin-top: 3px
+    }
+
+    .epfoot {
+      border-top: 1px solid #26344b;
+      padding-top: 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      color: var(--muted);
+      font-size: 10px
+    }
+
+    .empty {
+      padding: 38px 15px;
+      text-align: center;
+      color: var(--muted)
+    }
+
+    .empty strong {
+      display: block;
+      color: #dbe7f9;
+      margin: 8px
+    }
+
+    .modalback {
+      position: fixed;
+      inset: 0;
+      background: #050912cc;
+      backdrop-filter: blur(6px);
+      z-index: 10;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding:
+        18px
+    }
+
+    .modalback.open {
+      display: flex
+    }
+
+    .modal {
+      width: min(720px, 100%);
+      max-height: 90vh;
+      overflow: auto;
+      background: #111d31;
+      border: 1px solid #344968;
+      border-radius: 18px;
+      box-shadow: 0 30px 90px #0009
+    }
+
+    .modalhead {
+      padding: 18px 21px;
+      border-bottom: 1px solid #2a3b54;
+      display: flex;
+      align-items: center;
+      justify-content: space-between
+    }
+
+    .modalhead h2 {
+      font-size: 17px;
+      margin: 0
+    }
+
+    .modalbody {
+      padding: 20px
+    }
+
+    .modalfoot {
+      padding: 15px 20px;
+      border-top: 1px solid #2a3b54;
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px
+    }
+
+    .close {
+      border: 0;
+      background: transparent;
+      color: var(--muted);
+      font-size: 22px
+    }
+
+    .formgrid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 13px
+    }
+
+    .formgroup {
+      display: flex;
+      flex-direction: column;
+      gap: 6px
+    }
+
+    .formgroup label {
+      font-size: 11px;
+      color: #a8b8d0
+    }
+
+    .formgroup .field,
+    .formgroup .select,
+    .formgroup .textarea {
+      width: 100%
+    }
+
+    .formgroup.full {
+      grid-column: 1/-1
+    }
+
+    .textarea {
+      resize: vertical;
+      min-height: 90px
+    }
+
+    .detailgrid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-bottom: 18px
+    }
+
+    .detailitem {
+      border: 1px solid #2a3a53;
+      background: #0d1727;
+      border-radius: 10px;
+      padding: 12px
+    }
+
+    .detailitem span {
+      display: block;
+      color: var(--muted);
+      font-size: 10px;
+      margin-bottom: 4px
+    }
+
+    .detailitem strong {
+      font-size: 12px;
+      overflow-wrap: anywhere
+    }
+
+    .subheading {
+      font-size: 12px;
+      margin: 16px 0 8px
+    }
+
+    .finding {
+      padding: 11px 12px;
+      border-radius: 10px;
+      border: 1px solid #2a3a53;
+      background: #0e1829;
+      margin-bottom: 7px;
+      font-size: 12px
+    }
+
+    .finding strong {
+      display: block;
+      margin-bottom: 3px
+    }
+
+    .finding small {
+      color: var(--muted);
+      font-size: 11px
+    }
+
+    .toaststack {
+      position: fixed;
+      right: 18px;
+      top: 86px;
+      display: grid;
+      gap: 8px;
+      z-index: 30
+    }
+
+    .toast {
+      background: #172840;
+      border: 1px solid #35577e;
+      color: #edf4ff;
+      border-radius: 11px;
+      padding: 12px 15px;
+      box-shadow: var(--shadow);
+      min-width: 240px;
+      animation: in .2s ease
+    }
+
+    .toast small {
+      display: block;
+      color: #aec0da;
+      margin-top: 2px
+    }
+
+    @keyframes in {
+      from {
+        opacity: 0;
+        transform: translateY(-7px)
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0)
+      }
+    }
+
+    .dropzone {
+      border: 1px dashed #5275a6;
+      border-radius: 13px;
+      padding: 26px 16px;
+      text-align: center;
+      background: #101d31
+    }
+
+    .dropzone.drag {
+      background: #1b3153;
+      border-color: #91b7ff
+    }
+
+    .dropzone .upico {
+      font-size: 27px;
+      color: #8fb5ff
+    }
+
+    .dropzone strong {
+      display: block;
+      font-size: 13px;
+      margin-top: 6px
+    }
+
+    .dropzone p {
+      font-size: 11px;
+      color: var(--muted);
+      margin: 5px 0 13px
+    }
+
+    .footnote {
+      font-size: 10px;
+      color: #8394b0;
+      margin-top: 14px
+    }
+
+    .notice {
+      padding: 12px;
+      border-radius: 10px;
+      border: 1px solid #5a4b2b;
+      background: #30271566;
+      color: #f1d9a5;
+      font-size: 11px
+    }
+
+    .hide {
+      display: none !important
+    }
+
+    .mobilemenu {
+      display: none
+    }
+
+    @media(max-width:1100px) {
+      .app {
+        grid-template-columns: 210px 1fr
+      }
+
+      .content {
+        padding: 23px 20px
+      }
+
+      .topbar {
+        padding: 0 20px
+      }
+
+      .stats {
+        grid-template-columns: repeat(2, minmax(0, 1fr))
+      }
+
+      .split {
+        grid-template-columns: 1fr
+      }
+
+      .endpointgrid {
+        grid-template-columns: repeat(2, minmax(0, 1fr))
+      }
+    }
+
+    @media(max-width:760px) {
+      .app {
+        grid-template-columns: 1fr
+      }
+
+      .sidebar {
+        position: fixed;
+        z-index: 8;
+        inset: 0 auto 0 0;
+        width: 248px;
+        transform: translateX(-105%);
+        transition: transform .2s;
+        box-shadow: var(--shadow)
+      }
+
+      .sidebar.open {
+        transform: translateX(0)
+      }
+
+      .mobilemenu {
+        display: inline-grid;
+        place-items: center
+      }
+
+      .topbar {
+        height: 66px;
+        padding: 0 13px
+      }
+
+      .content {
+        padding: 21px 13px 35px
+      }
+
+      .topright {
+        gap: 6px
+      }
+
+      .user .usertext {
+        display: none
+      }
+
+      .crumb {
+        display: none
+      }
+
+      .pagehead {
+        flex-direction: column
+      }
+
+      .pagehead h1 {
+        font-size: 24px
+      }
+
+      .headactions {
+        width: 100%;
+        flex-wrap: wrap
+      }
+
+      .stats {
+        gap: 10px
+      }
+
+      .stat {
+        padding: 14px
+      }
+
+      .statnum {
+        font-size: 25px
+      }
+
+      .quickgrid,
+      .endpointgrid {
+        grid-template-columns: 1fr
+      }
+
+      .role-switch button {
+        padding: 7px 8px
+      }
+
+      .role-switch {
+        gap: 0
+      }
+
+      .role-switch button {
+        font-size: 11px
+      }
+
+      .formgrid,
+      .detailgrid {
+        grid-template-columns: 1fr
+      }
+
+      .formgroup.full {
+        grid-column: auto
+      }
+
+      .cardhead {
+        padding: 14px
+      }
+
+      .cardbody {
+        padding: 14px
+      }
+
+      .topright .iconbtn {
+        width: 34px;
+        height: 34px
+      }
+
+      .tablefoot {
+        gap: 8px;
+        flex-wrap: wrap
+      }
+    }
+
+    /* Refined component styling and accessible light theme */
+    :root {
+      color-scheme: dark;
+      --radius: 14px;
+      --shadow: 0 8px 28px rgba(0, 0, 0, .13)
+    }
+
+    html {
+      scroll-behavior: smooth
+    }
+
+    body {
+      transition: background .2s ease, color .2s ease
+    }
+
+    button,
+    .card,
+    .quick,
+    .sidebar,
+    .topbar,
+    .modal {
+      transition: background-color .18s ease, border-color .18s ease, color .18s ease, box-shadow .18s ease
+    }
+
+    button:focus-visible,
+    a:focus-visible,
+    input:focus-visible,
+    select:focus-visible,
+    textarea:focus-visible {
+      outline: 3px solid #83aaff;
+      outline-offset: 2px
+    }
+
+    .nav button {
+      font-weight: 550
+    }
+
+    .nav button.active {
+      box-shadow: inset 3px 0 0 #7da6ff
+    }
+
+    .card {
+      background: linear-gradient(145deg, #121f33, #0f192a);
+      border-color: #283850;
+      box-shadow: 0 7px 25px rgba(0, 0, 0, .12)
+    }
+
+    .cardhead {
+      border-bottom-color: var(--line)
+    }
+
+    .cardbody {
+      line-height: 1.6
+    }
+
+    .btn,
+    .iconbtn {
+      font-weight: 600;
+      transition: transform .15s ease, background .15s ease, border-color .15s ease
+    }
+
+    .btn:active,
+    .iconbtn:active {
+      transform: translateY(1px)
+    }
+
+    .btn:disabled {
+      opacity: .45;
+      cursor: not-allowed
+    }
+
+    .pagehead h1 {
+      font-size: clamp(23px, 2vw, 29px);
+      letter-spacing: -.65px
+    }
+
+    .pagehead p {
+      line-height: 1.65
+    }
+
+    .pill {
+      letter-spacing: .05px
+    }
+
+    .demo-banner {
+      line-height: 1.55
+    }
+
+    body.light {
+      color-scheme: light;
+      --bg: #f4f7fb;
+      --panel: #ffffff;
+      --panel2: #f8fafc;
+      --line: #dbe3ed;
+      --text: #172437;
+      --muted: #63738a;
+      --blue: #315fce;
+      --cyan: #137d77;
+      --purple: #7652c4;
+      --green: #177b5c;
+      --amber: #94600b;
+      --red: #c43e56;
+      --shadow: 0 8px 24px rgba(25, 42, 66, .07);
+      background: #f4f7fb;
+      color: var(--text)
+    }
+
+    body.light .sidebar {
+      background: #fff;
+      border-right-color: #e1e7f0;
+      box-shadow: 5px 0 24px rgba(25, 42, 66, .025)
+    }
+
+    body.light .brandmark {
+      box-shadow: 0 5px 16px #5e7ff022
+    }
+
+    body.light .navlabel {
+      color: #8290a5
+    }
+
+    body.light .nav button {
+      color: #53647b
+    }
+
+    body.light .nav button:hover {
+      background: #f1f5fb;
+      color: #1d3556
+    }
+
+    body.light .nav button.active {
+      background: #eaf0ff;
+      border-color: #d5e0ff;
+      color: #2049a0
+    }
+
+    body.light .nav .count {
+      background: #fee2e8;
+      color: #a42f4a
+    }
+
+    body.light .safetybox {
+      background: #f0faf6;
+      border-color: #d1e9df;
+      color: #165942
+    }
+
+    body.light .safetybox p {
+      color: #5c786e
+    }
+
+    body.light .topbar {
+      background: rgba(255, 255, 255, .92);
+      border-bottom-color: #e1e7f0;
+      backdrop-filter: blur(14px)
+    }
+
+    body.light .role-switch {
+      background: #f3f6fb;
+      border-color: #dbe3ed
+    }
+
+    body.light .role-switch button {
+      color: #52627a
+    }
+
+    body.light .role-switch button.active {
+      background: #dfe9ff;
+      color: #214ba3
+    }
+
+    body.light .iconbtn,
+    body.light .btn {
+      background: #fff;
+      color: #25364e;
+      border-color: #d6dfeb
+    }
+
+    body.light .btn:hover,
+    body.light .iconbtn:hover {
+      background: #f0f5ff;
+      border-color: #b9c9e4
+    }
+
+    body.light .btn.primary {
+      background: linear-gradient(110deg, #3568db, #6154ca);
+      color: #fff;
+      border: 0
+    }
+
+    body.light .btn.ghost {
+      background: transparent
+    }
+
+    body.light .btn.danger {
+      background: #fff1f2;
+      border-color: #fecdd3;
+      color: #b4233d
+    }
+
+    body.light .avatar {
+      background: #e7edff;
+      color: #244a9d
+    }
+
+    body.light .demo-banner {
+      background: #fff8e8;
+      border-color: #efdba6;
+      color: #77551b
+    }
+
+    body.light .demo-banner strong {
+      color: #67450b
+    }
+
+    body.light .card {
+      background: #fff;
+      border-color: #e0e7f0;
+      box-shadow: 0 5px 22px rgba(24, 43, 72, .045)
+    }
+
+    body.light .stat:after {
+      opacity: .1
+    }
+
+    body.light .cardhead,
+    body.light .divider,
+    body.light .tablefoot {
+      border-color: #e7edf4
+    }
+
+    body.light .chart .bars {
+      border-bottom-color: #e2e8f0
+    }
+
+    body.light .barlabel {
+      color: #8290a5
+    }
+
+    body.light .statuscircle {
+      background: #e7f6ef;
+      color: #167451
+    }
+
+    body.light .statusline small,
+    body.light .statusline .statusright {
+      color: #66778c
+    }
+
+    body.light .field,
+    body.light .select,
+    body.light .textarea {
+      background: #fff;
+      color: #192a41;
+      border-color: #ccd7e5
+    }
+
+    body.light .field::placeholder,
+    body.light .textarea::placeholder {
+      color: #8a98aa
+    }
+
+    body.light th {
+      background: #f6f8fc;
+      color: #687891
+    }
+
+    body.light th,
+    body.light td {
+      border-bottom-color: #e8edf4
+    }
+
+    body.light td {
+      color: #293a51
+    }
+
+    body.light tbody tr:hover {
+      background: #f6f9ff
+    }
+
+    body.light .fileicon {
+      background: #edf3ff;
+      border-color: #d5e2ff;
+      color: #315fbd
+    }
+
+    body.light .pill.safe {
+      background: #e7f7ef;
+      border-color: #bde8d1;
+      color: #176b4c
+    }
+
+    body.light .pill.suspicious {
+      background: #fff6e4;
+      border-color: #f4dfb0;
+      color: #8a5a08
+    }
+
+    body.light .pill.malicious {
+      background: #fff0f2;
+      border-color: #f5c5ce;
+      color: #a72e47
+    }
+
+    body.light .pill.pending {
+      background: #edf4ff;
+      border-color: #d2e2ff;
+      color: #315ca8
+    }
+
+    body.light .pill.analysis {
+      background: #f2edff;
+      border-color: #ddd0ff;
+      color: #6745ac
+    }
+
+    body.light .pill.resolved {
+      background: #e8f7ef;
+      border-color: #c4ead4;
+      color: #246b4e
+    }
+
+    body.light .quick {
+      background: #fff;
+      border-color: #e0e7f0;
+      color: #1f3048;
+      box-shadow: 0 5px 18px rgba(24, 43, 72, .035)
+    }
+
+    body.light .quick:hover {
+      border-color: #b9c9e8;
+      box-shadow: 0 9px 22px rgba(35, 75, 145, .08)
+    }
+
+    body.light .quickico,
+    body.light .epicon {
+      background: #edf3ff;
+      color: #315fbd
+    }
+
+    body.light .epfoot {
+      border-top-color: #e5ebf3
+    }
+
+    body.light .empty {
+      color: #718198
+    }
+
+    body.light .empty strong {
+      color: #23364f
+    }
+
+    body.light .modalback {
+      background: rgba(26, 39, 58, .45)
+    }
+
+    body.light .modal {
+      background: #fff;
+      border-color: #dbe3ed;
+      box-shadow: 0 30px 90px rgba(25, 42, 66, .22)
+    }
+
+    body.light .modalhead,
+    body.light .modalfoot {
+      border-color: #e1e8f1
+    }
+
+    body.light .formgroup label {
+      color: #52637a
+    }
+
+    body.light .detailitem,
+    body.light .finding {
+      background: #f8fafd;
+      border-color: #e0e7f0
+    }
+
+    body.light .notice {
+      background: #fff8e8;
+      border-color: #eedba5;
+      color: #765318
+    }
+
+    body.light .dropzone {
+      background: #f7faff;
+      border-color: #b8c9e6
+    }
+
+    body.light .dropzone.drag {
+      background: #ecf3ff
+    }
+
+    body.light .toast {
+      background: #fff;
+      color: #1c2c43;
+      border-color: #cfdaea;
+      box-shadow: 0 12px 32px rgba(22, 39, 64, .14)
+    }
+
+    body.light .toast small {
+      color: #64758c
+    }
+
+    body.light .linkbtn {
+      color: #315fbd
+    }
+
+    body.light .footnote {
+      color: #75869c
+    }
+
+    /* Employee experience: keep it calm, action-oriented, and non-technical */
+    .employee-intro {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 18px;
+      padding: 22px 24px;
+      margin-bottom: 18px;
+      border: 1px solid #2d4261;
+      border-radius: 16px;
+      background: linear-gradient(115deg, #172944, #132237)
+    }
+
+    .employee-intro h2 {
+      font-size: 18px;
+      margin: 0 0 5px;
+      letter-spacing: -.25px
+    }
+
+    .employee-intro p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 12px;
+      max-width: 590px
+    }
+
+    .employee-intro .introicon {
+      width: 46px;
+      height: 46px;
+      display: grid;
+      place-items: center;
+      border-radius: 14px;
+      background: #243c61;
+      color: #a8c4ff;
+      font-size: 23px;
+      flex-shrink: 0
+    }
+
+    .employee-steps {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+      margin-bottom: 18px
+    }
+
+    .employee-stats {
+      grid-template-columns: repeat(3, minmax(0, 1fr))
+    }
+
+    .employee-step {
+      display: flex;
+      align-items: flex-start;
+      gap: 11px;
+      padding: 15px;
+      border: 1px solid var(--line);
+      border-radius: 13px;
+      background: var(--panel)
+    }
+
+    .employee-step .stepnum {
+      width: 28px;
+      height: 28px;
+      display: grid;
+      place-items: center;
+      border-radius: 9px;
+      background: #203755;
+      color: #b6ceff;
+      font-weight: 750;
+      font-size: 12px;
+      flex-shrink: 0
+    }
+
+    .employee-step strong {
+      display: block;
+      font-size: 12px;
+      margin-bottom: 3px
+    }
+
+    .employee-step small {
+      display: block;
+      font-size: 11px;
+      color: var(--muted);
+      line-height: 1.5
+    }
+
+    .employee-status {
+      padding: 14px 16px;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: var(--panel2);
+      margin: 10px 0 16px
+    }
+
+    .employee-status strong {
+      display: block;
+      font-size: 13px;
+      margin-bottom: 4px
+    }
+
+    .employee-status p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.6
+    }
+
+    body.light .employee-intro {
+      background: linear-gradient(115deg, #edf3ff, #f7f9ff);
+      border-color: #d7e3fb
+    }
+
+    body.light .employee-intro p {
+      color: #5d6e85
+    }
+
+    body.light .employee-intro .introicon {
+      background: #dfeaff;
+      color: #315fbd
+    }
+
+    body.light .employee-step .stepnum {
+      background: #e5edff;
+      color: #3158a9
+    }
+
+    @media(max-width:760px) {
+      .employee-intro {
+        align-items: flex-start;
+        padding: 18px;
+        flex-wrap: wrap
+      }
+
+      .employee-intro .headactions {
+        width: 100%
+      }
+
+      .employee-steps {
+        grid-template-columns: 1fr
+      }
+
+      .employee-stats {
+        grid-template-columns: 1fr
+      }
+
+      .content {
+        max-width: 100%
+      }
+    }
+
+    body.light .statuscircle[style] {
+      background: #f2f6fb !important;
+      color: #42617f !important
+    }
+
+    body.light .statusline .statusright[style] {
+      color: #66778c !important
+    }
+
+
+    /* CyberHuntX UI refinement: calm surfaces, stronger hierarchy and role-appropriate density */
+    :root {
+      --bg: #0b1220;
+      --panel: #111b2b;
+      --panel2: #162338;
+      --line: #2a3950;
+      --text: #edf3fc;
+      --muted: #9aaac0;
+      --blue: #8baeff;
+      --cyan: #65d9cc;
+      --purple: #b7a0ff;
+      --green: #61d4ae;
+      --amber: #f3c36d;
+      --red: #ff8295;
+      --radius: 14px;
+      --shadow: 0 8px 24px rgba(0, 0, 0, .12)
+    }
+
+    body {
+      background: radial-gradient(ellipse at 72% -15%, rgba(63, 92, 156, .18), transparent 42%), #0b1220;
+      letter-spacing: .005em
+    }
+
+    .app {
+      grid-template-columns: 236px minmax(0, 1fr)
+    }
+
+    .sidebar {
+      background: #0d1625;
+      border-right-color: #243249;
+      padding: 24px 13px;
+      gap: 27px
+    }
+
+    .brand {
+      padding: 0 10px
+    }
+
+    .brandmark {
+      border-radius: 12px;
+      width: 37px;
+      height: 37px
+    }
+
+    .brand strong {
+      font-size: 15px
+    }
+
+    .brand small {
+      font-size: 9px;
+      letter-spacing: 1.35px
+    }
+
+    .navlabel {
+      font-size: 9px;
+      letter-spacing: 1.4px;
+      margin-bottom: 9px
+    }
+
+    .nav {
+      gap: 4px
+    }
+
+    .nav button {
+      padding: 10px 12px;
+      border-radius: 10px;
+      font-size: 12px;
+      min-height: 40px
+    }
+
+    .nav button.active {
+      box-shadow: inset 3px 0 0 #83a8ff
+    }
+
+    .safetybox {
+      padding: 13px;
+      border-radius: 12px
+    }
+
+    .safetybox p {
+      line-height: 1.55
+    }
+
+    .topbar {
+      height: 70px;
+      padding: 0 27px;
+      background: rgba(11, 18, 32, .88);
+      border-bottom-color: #253249
+    }
+
+    .topright {
+      gap: 9px
+    }
+
+    .role-switch {
+      border-radius: 11px;
+      padding: 3px
+    }
+
+    .role-switch button {
+      padding: 7px 10px;
+      font-size: 11px
+    }
+
+    .theme-toggle {
+      width: auto;
+      min-width: 38px;
+      height: 36px;
+      padding: 0 10px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 7px;
+      border-radius: 10px;
+      font-size: 11px;
+      white-space: nowrap
+    }
+
+    .theme-symbol {
+      font-size: 15px;
+      line-height: 1
+    }
+
+    .theme-label {
+      font-weight: 650
+    }
+
+    .content {
+      padding: 27px 28px 42px;
+      max-width: 1560px
+    }
+
+    .pagehead {
+      align-items: center;
+      margin-bottom: 20px;
+      gap: 20px
+    }
+
+    .pagehead h1 {
+      font-size: clamp(23px, 2vw, 28px);
+      letter-spacing: -.75px
+    }
+
+    .pagehead p {
+      font-size: 12px;
+      max-width: 620px
+    }
+
+    .eyebrow {
+      font-size: 9px;
+      letter-spacing: 1.45px
+    }
+
+    .card {
+      border-radius: 14px;
+      background: linear-gradient(145deg, #121d2e, #101a2a);
+      border-color: #29384e;
+      box-shadow: 0 5px 18px rgba(0, 0, 0, .09)
+    }
+
+    .cardhead {
+      padding: 16px 18px;
+      border-bottom-color: #28364b
+    }
+
+    .cardhead h2 {
+      font-size: 13px;
+      letter-spacing: -.1px
+    }
+
+    .cardhead p {
+      font-size: 11px;
+      line-height: 1.5
+    }
+
+    .cardbody {
+      padding: 16px 18px
+    }
+
+    .stat {
+      padding: 16px 17px;
+      border-radius: 13px
+    }
+
+    .stathead {
+      font-size: 11px
+    }
+
+    .statnum {
+      font-size: 28px;
+      margin-top: 12px
+    }
+
+    .statfoot {
+      font-size: 10px;
+      line-height: 1.5
+    }
+
+    .btn,
+    .iconbtn {
+      border-color: #31415a;
+      background: #17243a;
+      color: #e8eef8;
+      border-radius: 9px
+    }
+
+    .btn {
+      padding: 9px 12px;
+      font-size: 12px
+    }
+
+    .btn.small {
+      font-size: 11px;
+      padding: 7px 9px
+    }
+
+    .btn.primary {
+      background: linear-gradient(115deg, #477ee8, #655bd2);
+      box-shadow: 0 4px 14px rgba(77, 111, 219, .2)
+    }
+
+    .demo-banner {
+      border-radius: 11px;
+      padding: 10px 13px;
+      font-size: 11px;
+      margin-bottom: 18px;
+      box-shadow: none
+    }
+
+    .quick {
+      padding: 15px;
+      border-radius: 13px
+    }
+
+    .quickico {
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
+      font-size: 16px
+    }
+
+    .quick strong {
+      font-size: 12px
+    }
+
+    .quick small {
+      font-size: 10px;
+      line-height: 1.5
+    }
+
+    .field,
+    .select,
+    .textarea {
+      border-radius: 9px;
+      padding: 9px 10px;
+      font-size: 12px
+    }
+
+    .filters {
+      gap: 8px
+    }
+
+    .filterbar {
+      padding-top: 13px !important
+    }
+
+    .tablewrap {
+      border-radius: 0 0 13px 13px
+    }
+
+    table {
+      min-width: 720px
+    }
+
+    th {
+      font-size: 9px;
+      letter-spacing: .7px
+    }
+
+    th,
+    td {
+      padding: 12px 14px
+    }
+
+    td {
+      font-size: 11px
+    }
+
+    tbody tr:hover {
+      background: rgba(109, 148, 219, .06)
+    }
+
+    .pill {
+      padding: 4px 8px;
+      font-size: 10px;
+      border-radius: 6px;
+      font-weight: 650
+    }
+
+    .pill.online {
+      background: #12342e;
+      border-color: #24584b;
+      color: #73ddba
+    }
+
+    .pill.stale {
+      background: #392d1c;
+      border-color: #65502f;
+      color: #f5c36d
+    }
+
+    body.light {
+      background: #f4f7fb;
+      color: #18263a;
+      --bg: #f4f7fb;
+      --panel: #fff;
+      --panel2: #f7f9fc;
+      --line: #dfe6ef;
+      --text: #18263a;
+      --muted: #68788f;
+      --blue: #315fce;
+      --cyan: #147e78;
+      --purple: #7154be;
+      --green: #197657;
+      --amber: #8b5c0a;
+      --red: #bd3651;
+      --shadow: 0 7px 24px rgba(34, 53, 82, .055)
+    }
+
+    body.light .sidebar {
+      background: #fff;
+      border-right-color: #e1e7f0
+    }
+
+    body.light .topbar {
+      background: rgba(255, 255, 255, .9);
+      border-bottom-color: #e1e7ef
+    }
+
+    body.light .card {
+      background: #fff;
+      border-color: #e0e7f0;
+      box-shadow: 0 5px 20px rgba(31, 51, 82, .045)
+    }
+
+    body.light .nav button.active {
+      box-shadow: inset 3px 0 0 #416de0
+    }
+
+    body.light .demo-banner {
+      background: #fff8e8;
+      border-color: #eddba9;
+      color: #76571d
+    }
+
+    body.light .pill.online {
+      background: #e8f7ef;
+      border-color: #c4e9d5;
+      color: #176e4e
+    }
+
+    body.light .pill.stale {
+      background: #fff5df;
+      border-color: #f1dfb4;
+      color: #85590c
+    }
+
+    body.light .role-switch button.active {
+      background: #e0eaff;
+      color: #214da9
+    }
+
+    body.light .theme-toggle {
+      background: #f8fafc;
+      color: #364860;
+      border-color: #d5dfeb
+    }
+
+    body.light .theme-toggle:hover {
+      background: #eff4fc;
+      border-color: #bacbe4
+    }
+
+    body.light .tablefoot {
+      border-top-color: #e6ecf3
+    }
+
+    /* Employee portal deliberately avoids analyst jargon and dense technical details. */
+    .employee-intro {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 18px 20px;
+      margin-bottom: 16px;
+      border: 1px solid #2c4261;
+      border-radius: 14px;
+      background: linear-gradient(115deg, #172944, #132237)
+    }
+
+    .employee-intro .introicon {
+      order: -1;
+      width: 42px;
+      height: 42px;
+      flex-shrink: 0;
+      border-radius: 12px;
+      background: #243c61;
+      color: #acd0ff;
+      font-size: 20px
+    }
+
+    .employee-intro .introcopy {
+      flex: 1;
+      min-width: 0
+    }
+
+    .employee-intro h2 {
+      font-size: 16px;
+      margin: 0 0 3px
+    }
+
+    .employee-intro p {
+      font-size: 11px;
+      max-width: 620px;
+      line-height: 1.6
+    }
+
+    .employee-intro .introhelp {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      font-size: 10px;
+      color: #b8c9df;
+      white-space: nowrap;
+      padding-left: 16px;
+      border-left: 1px solid #344966
+    }
+
+    .mini-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: #52cba4;
+      display: inline-block
+    }
+
+    .employee-stats {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      margin-bottom: 18px
+    }
+
+    .employee-recent .cardhead {
+      padding: 16px 18px
+    }
+
+    .employee-list {
+      padding: 0 18px
+    }
+
+    .employee-listrow {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 13px 0;
+      border-bottom: 1px solid var(--line)
+    }
+
+    .employee-listrow:last-child {
+      border-bottom: 0
+    }
+
+    .employee-fileinfo {
+      flex: 1;
+      min-width: 0
+    }
+
+    .employee-fileinfo strong {
+      display: block;
+      font-size: 12px;
+      overflow-wrap: anywhere
+    }
+
+    .employee-fileinfo small {
+      display: block;
+      color: var(--muted);
+      font-size: 10px;
+      margin-top: 3px
+    }
+
+    .employee-result {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 5px;
+      min-width: 118px
+    }
+
+    .result-label {
+      font-size: 9px;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: .65px
+    }
+
+    .employee-empty {
+      padding: 28px 18px;
+      text-align: center
+    }
+
+    .employee-empty strong {
+      display: block;
+      font-size: 13px
+    }
+
+    .employee-empty p {
+      margin: 5px 0 14px;
+      color: var(--muted);
+      font-size: 11px
+    }
+
+    .empty-icon {
+      margin: 0 auto 10px;
+      width: 38px;
+      height: 38px;
+      border-radius: 12px;
+      display: grid;
+      place-items: center;
+      background: #1b3050;
+      color: #a7c4ff;
+      font-size: 22px
+    }
+
+    .employee-footnote {
+      margin-top: 12px
+    }
+
+    .employee-step {
+      box-shadow: none
+    }
+
+    .employee-status {
+      line-height: 1.6
+    }
+
+    body.light .employee-intro {
+      background: linear-gradient(110deg, #edf3ff, #f8faff);
+      border-color: #d9e4f7
+    }
+
+    body.light .employee-intro .introicon {
+      background: #dfeaff;
+      color: #315fbd
+    }
+
+    body.light .employee-intro .introhelp {
+      color: #5c6f89;
+      border-left-color: #d5e0f0
+    }
+
+    body.light .employee-listrow {
+      border-bottom-color: #e8edf4
+    }
+
+    body.light .empty-icon {
+      background: #edf3ff;
+      color: #315fbd
+    }
+
+    body.light .employee-status {
+      background: #f7f9fc
+    }
+
+    body.light .employee-step .stepnum {
+      background: #e5edff;
+      color: #3158a9
+    }
+
+    @media(max-width:1000px) {
+      .app {
+        grid-template-columns: 218px minmax(0, 1fr)
+      }
+
+      .content {
+        padding: 23px 19px 35px
+      }
+
+      .topbar {
+        padding: 0 19px
+      }
+
+      .employee-intro .introhelp {
+        display: none
+      }
+    }
+
+    @media(max-width:760px) {
+      .app {
+        grid-template-columns: 1fr
+      }
+
+      .content {
+        padding: 20px 13px 32px
+      }
+
+      .topbar {
+        padding: 0 12px
+      }
+
+      .topright {
+        gap: 5px
+      }
+
+      .theme-label {
+        display: none
+      }
+
+      .theme-toggle {
+        width: 36px;
+        padding: 0
+      }
+
+      .role-switch button {
+        padding: 7px 8px;
+        font-size: 10px
+      }
+
+      .employee-intro {
+        align-items: flex-start;
+        padding: 15px;
+        flex-wrap: wrap
+      }
+
+      .employee-intro .introcopy {
+        flex-basis: calc(100% - 58px)
+      }
+
+      .employee-intro .introhelp {
+        display: none
+      }
+
+      .employee-stats {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 8px
+      }
+
+      .employee-stats .stat {
+        padding: 12px
+      }
+
+      .employee-stats .statnum {
+        font-size: 23px
+      }
+
+      .employee-stats .stathead {
+        font-size: 10px
+      }
+
+      .employee-list {
+        padding: 0 13px
+      }
+
+      .employee-listrow {
+        gap: 9px;
+        flex-wrap: wrap
+      }
+
+      .employee-fileinfo {
+        min-width: calc(100% - 54px);
+        flex: 1
+      }
+
+      .employee-result {
+        margin-left: 46px;
+        min-width: auto;
+        flex: 1
+      }
+
+      .employee-listrow>.btn {
+        margin-left: auto
+      }
+
+      .pagehead {
+        align-items: flex-start
+      }
+
+      .headactions {
+        width: 100%;
+        flex-wrap: wrap
+      }
+
+      .user .usertext {
+        display: none
+      }
+    }
+
+    @media(max-width:430px) {
+      .employee-stats {
+        grid-template-columns: 1fr
+      }
+
+      .employee-stats .stat {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px
+      }
+
+      .employee-stats .statnum {
+        margin: 0;
+        font-size: 22px
+      }
+
+      .employee-stats .statfoot {
+        max-width: 45%;
+        text-align: right
+      }
+
+      .role-switch button {
+        padding: 6px 7px
+      }
+
+      .topbar {
+        gap: 6px
+      }
+
+      .brand small {
+        letter-spacing: 1px
+      }
+    }
+
+    @media(prefers-reduced-motion:reduce) {
+
+      *,
+      *::before,
+      *::after {
+        scroll-behavior: auto !important;
+        transition: none !important;
+        animation: none !important
+      }
+    }
+
+
+    /* AI investigation assistant */
+    .ai-layout {
+      grid-template-columns: minmax(245px, 310px) minmax(0, 1fr);
+      align-items: start;
+      gap: 16px
+    }
+
+    .ai-sidebar {
+      display: grid;
+      gap: 14px;
+      min-width: 0
+    }
+
+    .ai-context {
+      padding: 17px
+    }
+
+    .ai-context-top {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 14px
+    }
+
+    .ai-orb {
+      width: 42px;
+      height: 42px;
+      display: grid;
+      place-items: center;
+      border-radius: 14px;
+      color: #fff;
+      background: linear-gradient(135deg, #5c8cff, #8968e8);
+      box-shadow: 0 7px 20px #5e7ff033;
+      font-size: 20px;
+      flex-shrink: 0
+    }
+
+    .ai-context-top strong {
+      display: block;
+      font-size: 13px
+    }
+
+    .ai-context-top small {
+      display: block;
+      color: var(--muted);
+      font-size: 10px;
+      margin-top: 2px
+    }
+
+    .ai-fieldlabel {
+      font-size: 11px;
+      color: var(--muted);
+      font-weight: 650;
+      display: block;
+      margin: 0 0 6px
+    }
+
+    .ai-case-select {
+      width: 100%;
+      margin-bottom: 14px
+    }
+
+    .ai-context-summary {
+      font-size: 12px;
+      color: var(--muted);
+      line-height: 1.65;
+      margin: 8px 0 0
+    }
+
+    .ai-facts {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-top: 14px
+    }
+
+    .ai-fact {
+      border: 1px solid var(--line);
+      background: var(--panel2);
+      border-radius: 10px;
+      padding: 10px;
+      min-width: 0
+    }
+
+    .ai-fact span {
+      display: block;
+      color: var(--muted);
+      font-size: 10px
+    }
+
+    .ai-fact strong {
+      display: block;
+      font-size: 12px;
+      margin-top: 4px;
+      overflow-wrap: anywhere
+    }
+
+    .ai-prompts {
+      display: grid;
+      gap: 7px;
+      margin-top: 12px
+    }
+
+    .ai-prompt {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      text-align: left;
+      width: 100%;
+      padding: 10px 11px;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: var(--panel2);
+      color: var(--text);
+      font-size: 11px;
+      transition: .16s
+    }
+
+    .ai-prompt:hover {
+      border-color: var(--blue);
+      transform: translateY(-1px)
+    }
+
+    .ai-prompt .prompt-arrow {
+      margin-left: auto;
+      color: var(--blue);
+      font-size: 14px
+    }
+
+    .ai-chat {
+      display: flex;
+      flex-direction: column;
+      min-height: 660px;
+      overflow: hidden
+    }
+
+    .ai-chat-head {
+      padding: 16px 19px;
+      border-bottom: 1px solid var(--line);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px
+    }
+
+    .ai-chat-title {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      min-width: 0
+    }
+
+    .ai-chat-title strong {
+      display: block;
+      font-size: 13px
+    }
+
+    .ai-chat-title small {
+      display: block;
+      color: var(--muted);
+      font-size: 10px;
+      margin-top: 3px
+    }
+
+    .ai-state {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      border: 1px solid #6e572c;
+      color: var(--amber);
+      background: color-mix(in srgb, var(--amber) 9%, transparent);
+      border-radius: 99px;
+      padding: 5px 9px;
+      font-size: 10px;
+      white-space: nowrap
+    }
+
+    .ai-state:before {
+      content: "";
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: currentColor
+    }
+
+    .ai-messages {
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      overflow-y: auto;
+      min-height: 360px;
+      max-height: calc(100vh - 330px);
+      background: linear-gradient(180deg, transparent, rgba(100, 125, 170, .025))
+    }
+
+    .ai-message {
+      display: flex;
+      gap: 10px;
+      align-items: flex-start;
+      max-width: 94%;
+      min-width: 0
+    }
+
+    .ai-message.user {
+      align-self: flex-end;
+      flex-direction: row-reverse
+    }
+
+    .ai-message-avatar {
+      width: 30px;
+      height: 30px;
+      border-radius: 10px;
+      display: grid;
+      place-items: center;
+      background: var(--panel2);
+      border: 1px solid var(--line);
+      color: var(--blue);
+      flex-shrink: 0;
+      font-size: 13px;
+      font-weight: 800
+    }
+
+    .ai-message.user .ai-message-avatar {
+      background: #2e4c86;
+      color: #fff;
+      border-color: #4766a3
+    }
+
+    .ai-message-body {
+      min-width: 0
+    }
+
+    .ai-message-meta {
+      font-size: 10px;
+      color: var(--muted);
+      margin: 0 0 5px;
+      display: flex;
+      gap: 8px;
+      align-items: center
+    }
+
+    .ai-message.user .ai-message-meta {
+      justify-content: flex-end
+    }
+
+    .ai-bubble {
+      border: 1px solid var(--line);
+      background: var(--panel2);
+      border-radius: 4px 13px 13px 13px;
+      padding: 12px 14px;
+      color: var(--text);
+      font-size: 12px;
+      line-height: 1.75;
+      white-space: pre-wrap;
+      overflow-wrap: anywhere
+    }
+
+    .ai-message.user .ai-bubble {
+      background: linear-gradient(135deg, #305fc5, #6554c6);
+      color: #fff;
+      border-color: transparent;
+      border-radius: 13px 4px 13px 13px
+    }
+
+    .ai-citation {
+      font-size: 10px;
+      color: var(--muted);
+      margin-top: 7px
+    }
+
+    .ai-empty {
+      margin: auto;
+      text-align: center;
+      max-width: 440px;
+      padding: 18px 10px;
+      color: var(--muted)
+    }
+
+    .ai-empty .ai-orb {
+      margin: 0 auto 12px
+    }
+
+    .ai-empty strong {
+      display: block;
+      font-size: 14px;
+      color: var(--text);
+      margin-bottom: 5px
+    }
+
+    .ai-empty p {
+      font-size: 12px;
+      line-height: 1.7;
+      margin: 0
+    }
+
+    .ai-composer {
+      border-top: 1px solid var(--line);
+      padding: 15px 18px 17px;
+      background: var(--panel)
+    }
+
+    .ai-composer-form {
+      display: flex;
+      align-items: flex-end;
+      gap: 9px
+    }
+
+    .ai-prompt-input {
+      width: 100%;
+      resize: vertical;
+      min-height: 48px;
+      max-height: 140px;
+      background: var(--panel2);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 12px;
+      color: var(--text);
+      outline: none;
+      font: inherit;
+      font-size: 12px;
+      line-height: 1.5
+    }
+
+    .ai-prompt-input:focus {
+      border-color: var(--blue);
+      box-shadow: 0 0 0 3px color-mix(in srgb, var(--blue) 15%, transparent)
+    }
+
+    .ai-send {
+      height: 46px;
+      min-width: 48px;
+      border-radius: 12px;
+      font-size: 17px
+    }
+
+    .ai-composer-note {
+      font-size: 10px;
+      color: var(--muted);
+      margin: 8px 1px 0
+    }
+
+    .ai-disclaimer {
+      display: flex;
+      gap: 8px;
+      align-items: flex-start;
+      font-size: 10px;
+      line-height: 1.55;
+      color: var(--muted);
+      padding: 11px 12px;
+      border: 1px solid var(--line);
+      border-radius: 11px;
+      background: var(--panel2)
+    }
+
+    .ai-case-open {
+      margin-top: 12px;
+      width: 100%
+    }
+
+    body.light .ai-state {
+      background: #fff8e8;
+      border-color: #eddaa8;
+      color: #885d0b
+    }
+
+    body.light .ai-message.user .ai-message-avatar {
+      background: #e6ecff;
+      color: #315fce;
+      border-color: #cedaff
+    }
+
+    body.light .ai-chat {
+      background: #fff
+    }
+
+    @media(max-width:1050px) {
+      .ai-layout {
+        grid-template-columns: 1fr
+      }
+
+      .ai-sidebar {
+        grid-template-columns: repeat(2, minmax(0, 1fr))
+      }
+
+      .ai-chat {
+        min-height: 590px
+      }
+
+      .ai-messages {
+        max-height: 560px
+      }
+    }
+
+    @media(max-width:650px) {
+      .ai-sidebar {
+        grid-template-columns: 1fr
+      }
+
+      .ai-chat {
+        min-height: 570px
+      }
+
+      .ai-chat-head {
+        padding: 13px;
+        align-items: flex-start;
+        flex-direction: column
+      }
+
+      .ai-messages {
+        padding: 13px;
+        min-height: 330px;
+        max-height: 55vh
+      }
+
+      .ai-message {
+        max-width: 100%
+      }
+
+      .ai-composer {
+        padding: 12px
+      }
+
+      .ai-composer-form {
+        align-items: stretch
+      }
+
+      .ai-send {
+        min-width: 44px
+      }
+
+      .ai-state {
+        font-size: 9px
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="app">
+    <aside class="sidebar" id="sidebar">
+      <div class="brand">
+        <div class="brandmark">⌁</div>
+        <div><strong>CyberHuntX</strong><small>Threat triage platform</small></div>
+      </div>
+      <div>
+        <div class="navlabel">Workspace</div>
+        <nav class="nav" id="nav"></nav>
+      </div>
+      <div class="sidebottom">
+        <div class="safetybox">
+          <div><span class="dot"></span><strong>Local demo mode</strong></div>
+          <p>Sample data only. No files are sent to a server or executed.</p>
+        </div>
+        <div style="padding:12px 10px 0;color:#6e819f;font-size:10px">ACADEMIC PROTOTYPE · v0.1.0</div>
+      </div>
+    </aside>
+    <main class="main">
+      <header class="topbar">
+        <div style="display:flex;align-items:center;gap:12px"><button class="iconbtn mobilemenu" id="mobilemenu"
+            aria-label="Open navigation">☰</button>
+          <div>
+            <div class="crumb">CyberHuntX / <span id="crumb">Overview</span></div>
+            <div style="font-weight:700;font-size:13px" id="topTitle">Security overview</div>
+          </div>
+        </div>
+        <div class="topright">
+          <div class="role-switch" aria-label="Switch demonstration role"><button data-role="admin" class="active">Admin
+              SOC</button><button data-role="employee">Employee</button></div><button class="iconbtn theme-toggle"
+            id="themeToggle" title="Switch to light mode" aria-label="Switch to light mode" aria-pressed="false"><span
+              class="theme-symbol" aria-hidden="true">☼</span><span class="theme-label">Light
+              mode</span></button><button class="iconbtn" id="notifyBtn" title="Notifications">♧<span id="notifyDot"
+              style="position:absolute;width:6px;height:6px;border-radius:50%;background:var(--red);right:7px;top:6px"></span></button>
+          <div class="user">
+            <div class="avatar" id="avatar">SA</div>
+            <div class="usertext"><strong id="username">SOC Administrator</strong><small id="userrole">Security
+                Operations</small></div>
+          </div>
+        </div>
+      </header>
+      <section class="content" id="content"></section>
+    </main>
+  </div>
+  <div class="modalback" id="modalback">
+    <section class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+      <div class="modalhead">
+        <h2 id="modalTitle">Details</h2><button class="close" id="closeModal" aria-label="Close">×</button>
+      </div>
+      <div class="modalbody" id="modalbody"></div>
+      <div class="modalfoot" id="modalfoot"></div>
+    </section>
+  </div>
+  <div class="toaststack" id="toaststack" aria-live="polite"></div>
+  <input type="file" id="fileInput" accept=".exe,application/vnd.microsoft.portable-executable,application/octet-stream"
+    hidden />
+  <script>
+    (() => {
+      const STORE = 'cyberhuntx_demo_v1';
+      const initial = () => ({
+        role: 'admin', aiChats: {}, notifications: [{ id: 'n1', title: 'New case awaiting review', detail: 'CHX-2026-1042 · invoice_update.exe', time: new Date(Date.now() - 12 * 60000).toISOString(), read: false }],
+        cases: [
+          { id: 'CHX-2026-1042', file: 'invoice_update.exe', size: 284672, employee: 'Aarav Shah', email: 'aarav.shah@example.test', submitted: new Date(Date.now() - 35 * 60000).toISOString(), status: 'Pending review', verdict: 'Pending', sha256: '8f14e45fceea167a5a36dedd4bea2543f90b27c15b142e1a9e0e8a3f8a8a4d2c', source: 'Demo sample', notes: [], analysis: { mode: 'SIMULATED', pe: 'PE structure: simulated valid sample', arch: 'x64 (sample)', entropy: 7.12, imports: ['VirtualAlloc', 'WriteProcessMemory', 'CreateRemoteThread'], yara: [{ name: 'Demo_Suspicious_Imports', desc: 'Illustrative import-pattern match; not a real YARA scan.' }], summary: 'The sample record includes several indicators often reviewed during triage. These illustrative findings do not establish that a real file is malicious.', findings: [['Import indicators', 'Process-memory APIs appear in the sample record.', 'Context-dependent; may be legitimate in some applications.'], ['Entropy observation', 'Sample section entropy is shown as 7.12.', 'High entropy can reflect compression or packing; it is not proof of malware.'], ['YARA status', 'One illustrative rule match is included.', 'Simulated match only; no local rules were executed.']] }, events: [{ time: new Date(Date.now() - 35 * 60000).toISOString(), text: 'Submitted by Aarav Shah' }] },
+          { id: 'CHX-2026-1039', file: 'quarterly_report.exe', size: 913408, employee: 'Mira Patel', email: 'mira.patel@example.test', submitted: new Date(Date.now() - 5 * 3600000).toISOString(), status: 'Resolved', verdict: 'Safe', sha256: 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855', source: 'Demo sample', notes: [{ author: 'SOC Administrator', text: 'Illustrative demo review: no suspicious indicators in the supplied sample record.', time: new Date(Date.now() - 3 * 3600000).toISOString() }], analysis: { mode: 'SIMULATED', pe: 'PE structure: simulated valid sample', arch: 'x64 (sample)', entropy: 5.21, imports: ['GetFileVersionInfoW', 'CreateFileW'], yara: [], summary: 'Illustrative benign-looking sample profile. A real safe verdict would require appropriate evidence and policy review.', findings: [['Import indicators', 'Common file and version-information APIs in sample data.', 'Not sufficient by themselves to determine intent.'], ['Entropy observation', 'Sample entropy is 5.21.', 'Entropy alone cannot classify this file.']] }, events: [] },
+          { id: 'CHX-2026-1036', file: 'driver_patch.exe', size: 1712128, employee: 'Dev Mehta', email: 'dev.mehta@example.test', submitted: new Date(Date.now() - 27 * 3600000).toISOString(), status: 'Resolved', verdict: 'Malicious', sha256: 'b6d81b360a5672d80c27430f39153e2c9c0e7f0e2a3f5c8d4e6b1a0f9d7c2e11', source: 'Demo sample', notes: [{ author: 'SOC Administrator', text: 'Demonstration case only. Recorded as malicious for workflow testing.', time: new Date(Date.now() - 22 * 3600000).toISOString() }], analysis: { mode: 'SIMULATED', pe: 'PE structure: simulated valid sample', arch: 'x64 (sample)', entropy: 7.76, imports: ['WinExec', 'URLDownloadToFileW'], yara: [{ name: 'Demo_Dropper_Indicator', desc: 'Illustrative rule match; not run against a real file.' }], summary: 'This seeded demonstration case is labelled malicious to exercise the review workflow. The record is not based on a real sample.', findings: [['Import indicators', 'The sample record includes APIs that can merit review.', 'Treat as indicators, not standalone proof.'], ['YARA status', 'Illustrative demonstration rule matched.', 'Mock data; no malware detection engine ran.']] }, events: [] },
+          { id: 'CHX-2026-1034', file: 'meeting_notes.exe', size: 132096, employee: 'Aarav Shah', email: 'aarav.shah@example.test', submitted: new Date(Date.now() - 46 * 3600000).toISOString(), status: 'Resolved', verdict: 'Suspicious', sha256: 'c157a79031e1c40f85931829bc5fc552', source: 'Demo sample', notes: [{ author: 'SOC Administrator', text: 'Further validation required in a real workflow.', time: new Date(Date.now() - 40 * 3600000).toISOString() }], analysis: { mode: 'SIMULATED', pe: 'PE structure: simulated valid sample', arch: 'x86 (sample)', entropy: 6.89, imports: ['LoadLibraryA', 'GetProcAddress'], yara: [], summary: 'Illustrative ambiguous case. More evidence would be needed before a confident decision.', findings: [['Import indicators', 'Dynamic library-loading APIs are present in the sample data.', 'Common in legitimate and suspicious programs.'], ['Entropy observation', 'Sample entropy is 6.89.', 'Review alongside other evidence.']] }, events: [] }
+        ],
+        endpoints: [
+          { id: 'EP-001', host: 'FIN-WS-042', user: 'Mira Patel', os: 'Windows 11 Enterprise', ip: '10.20.4.42', state: 'Online', heartbeat: new Date(Date.now() - 2 * 60000).toISOString(), software: 38, security: 'Protected', events: 4 },
+          { id: 'EP-002', host: 'HR-LT-018', user: 'Aarav Shah', os: 'Windows 11 Pro', ip: '10.20.7.18', state: 'Online', heartbeat: new Date(Date.now() - 4 * 60000).toISOString(), software: 51, security: 'Protected', events: 1 },
+          { id: 'EP-003', host: 'ENG-WS-026', user: 'Dev Mehta', os: 'Windows 10 Enterprise', ip: '10.20.9.26', state: 'Stale', heartbeat: new Date(Date.now() - 96 * 60000).toISOString(), software: 44, security: 'Needs review', events: 7 }
+        ], audit: [{ id: 'AUD-001', action: 'Demo workspace initialized', actor: 'System', caseId: '—', time: new Date().toISOString(), detail: 'Seed data loaded locally.' }]
+      });
+      let state; try { state = JSON.parse(localStorage.getItem(STORE)) || initial() } catch { state = initial() }
+      if (!state.cases || !state.endpoints) state = initial();
+      if (!state.aiChats || typeof state.aiChats !== 'object') state.aiChats = {};
+      let assistantCaseId = null;
+      let page = 'overview', query = '', statusFilter = 'All statuses', selectedCase = null, selectedEndpoint = null, casePage = 1, unreadOpen = false, pendingFile = null, dragTarget = null;
+      const $ = id => document.getElementById(id); const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+      const save = () => { try { localStorage.setItem(STORE, JSON.stringify(state)) } catch (e) { toast('Storage limit reached', 'Some changes may not persist in this browser.') } };
+      const fmtDate = s => new Date(s).toLocaleString(undefined, { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+      const fmtSize = n => n < 1024 ? `${n} B` : n < 1048576 ? `${(n / 1024).toFixed(1)} KB` : `${(n / 1048576).toFixed(2)} MB`;
+      const shortHash = h => h ? (h.length > 23 ? h.slice(0, 10) + '…' + h.slice(-7) : h) : 'Not available';
+      const pill = v => { let c = 'pending'; if (['Safe'].includes(v)) c = 'safe'; if (['Suspicious'].includes(v)) c = 'suspicious'; if (['Malicious'].includes(v)) c = 'malicious'; if (['Resolved'].includes(v)) c = 'resolved'; if (['Analysis complete', 'Analyzing'].includes(v)) c = 'analysis'; return `<span class="pill ${c}">${esc(v)}</span>` };
+      const endpointPill = e => `<span class="pill ${e.state === 'Online' ? 'online' : 'stale'}">${esc(e.state)}</span>${e.security === 'Needs review' ? ` <span class="pill suspicious">Needs review</span>` : ''}`;
+      const cases = () => state.cases.slice().sort((a, b) => new Date(b.submitted) - new Date(a.submitted));
+      const counts = () => ({ total: state.cases.length, pending: state.cases.filter(c => !['Resolved'].includes(c.status)).length, suspicious: state.cases.filter(c => c.verdict === 'Suspicious').length, malicious: state.cases.filter(c => c.verdict === 'Malicious').length, resolved: state.cases.filter(c => c.status === 'Resolved').length });
+      function toast(title, detail = '') { const el = document.createElement('div'); el.className = 'toast'; el.innerHTML = `<strong>${esc(title)}</strong>${detail ? `<small>${esc(detail)}</small>` : ''}`; $('toaststack').appendChild(el); setTimeout(() => el.remove(), 3600) }
+      function audit(action, caseId = '—', detail = '') { state.audit.unshift({ id: 'AUD-' + Math.random().toString(36).slice(2, 8).toUpperCase(), action, actor: state.role === 'admin' ? 'SOC Administrator' : 'Aarav Shah', caseId, time: new Date().toISOString(), detail }); state.audit = state.audit.slice(0, 100); save() }
+      function notify(title, detail) { state.notifications.unshift({ id: 'n' + Math.random().toString(36).slice(2), title, detail, time: new Date().toISOString(), read: false }); $('notifyDot').classList.remove('hide'); save() }
+      const navDefs = [{ group: 'Workspace', items: [['overview', '◫', 'Overview'], ['cases', '▤', 'Case queue', 'pending'], ['endpoints', '▣', 'Endpoints'], ['reports', '▧', 'Reports']] }, { group: 'Intelligence', items: [['ai', '✧', 'AI Assistant']] }, { group: 'System', items: [['audit', '◷', 'Audit history'], ['settings', '⚙', 'Demo settings']] }];
+      function drawNav() { const isEmp = state.role === 'employee'; const items = isEmp ? [['overview', '⌂', 'Home'], ['cases', '▤', 'My submissions'], ['reports', '▧', 'My reports']] : null; let html = ''; (isEmp ? [{ group: 'Employee workspace', items }] : navDefs).forEach(g => { html += `<div class="navlabel" style="margin-top:3px">${g.group}</div>`; g.items.forEach(([key, ico, label, badge]) => { const cnt = badge === 'pending' ? counts().pending : 0; html += `<button data-page="${key}" class="${page === key ? 'active' : ''}"><span class="ico">${ico}</span><span>${label}</span>${cnt ? `<span class="count">${cnt}</span>` : ''}</button>` }) }); $('nav').innerHTML = html; }
+      function setPage(p) { page = p; query = ''; statusFilter = 'All statuses'; casePage = 1; drawNav(); render(); $('sidebar').classList.remove('open'); }
+      function head(eyebrow, title, desc, actions = '') { return `<div class="pagehead"><div><div class="eyebrow">${eyebrow}</div><h1>${title}</h1><p>${desc}</p></div><div class="headactions">${actions}</div></div>` }
+      function banner() { return `<div class="demo-banner"><span>ⓘ</span><div><strong>DEMONSTRATION MODE</strong> — Analysis, AI explanations and endpoint telemetry use sample data. No uploaded file is executed or sent to a backend. A real verdict requires a properly configured and validated analysis pipeline.</div></div>` }
+      function employeeBanner() { return `<div class="demo-banner"><span>ⓘ</span><div><strong>DEMO WEBSITE</strong> — Your selected file is not sent anywhere or opened. Review results shown here are examples.</div></div>` }
+      function stat(label, num, foot, ico, accent, glow) { return `<div class="card stat" style="--accent:${accent};--glow:${glow || accent}"><div class="stathead"><span>${label}</span><span class="staticon">${ico}</span></div><div class="statnum">${num}</div><div class="statfoot">${foot}</div></div>` }
+      function tableRows(arr, employee = false) {
+        if (!arr.length) return `<tr><td colspan="${employee ? 4 : 6}"><div class="empty"><strong>No submissions found</strong>${employee ? 'Submit a file to start a review.' : 'Try adjusting your filters or inspect a submission.'}</div></td></tr>`;
+        if (employee) return arr.map(c => `<tr><td><div class="filecell"><div class="fileicon">EXE</div><div><strong>${esc(c.file)}</strong><small>${esc(c.id)}</small></div></div></td><td>${fmtDate(c.submitted)}</td><td>${pill(c.status === 'Resolved' ? c.verdict : c.status)}</td><td><div class="rowactions"><button class="btn small" data-open-case="${esc(c.id)}">View update →</button></div></td></tr>`).join('');
+        return arr.map(c => `<tr><td><div class="filecell"><div class="fileicon">EXE</div><div><strong>${esc(c.file)}</strong><small>${esc(c.id)}</small></div></div></td><td>${esc(c.employee)}<div style="font-size:10px;color:var(--muted);margin-top:3px">${fmtDate(c.submitted)}</div></td><td>${pill(c.verdict)}</td><td>${pill(c.status)}</td><td>${esc(fmtSize(c.size))}</td><td><div class="rowactions"><button class="btn small" data-open-case="${esc(c.id)}">Investigate ↗</button></div></td></tr>`).join('')
+      } function filteredCases() { let all = cases().filter(c => state.role !== 'employee' || c.employee === 'Aarav Shah'); if (query) all = all.filter(c => [c.id, c.file, c.employee, c.verdict, c.status].join(' ').toLowerCase().includes(query.toLowerCase())); if (statusFilter !== 'All statuses') all = all.filter(c => c.status === statusFilter || c.verdict === statusFilter); return all }
+      function casesTable(showFilters = true) {
+        let all = filteredCases(); const total = all.length, per = 6, pages = Math.max(1, Math.ceil(total / per)); casePage = Math.min(casePage, pages); const shown = all.slice((casePage - 1) * per, casePage * per); const employee = state.role === 'employee';
+        return `<div class="card"><div class="cardhead"><div><h2>${employee ? 'My submissions' : 'Submission review queue'}</h2><p>${employee ? 'Your files and the latest review status.' : `${total} case${total === 1 ? '' : 's'} · shared workflow records`}</p></div>${employee ? `<button class="btn primary small" id="uploadTop">＋ Submit a file</button>` : ''}</div>${showFilters ? `<div class="cardbody filterbar"><div class="filters"><input class="field search" id="caseSearch" value="${esc(query)}" placeholder="${employee ? 'Search your submissions' : 'Search file, case ID, owner…'}"/><select class="select" id="statusFilter"><option>All statuses</option>${['Pending review', 'Analyzing', 'Resolved', 'Escalated', 'Safe', 'Suspicious', 'Malicious'].map(s => `<option ${statusFilter === s ? 'selected' : ''}>${s}</option>`).join('')}</select><button class="btn small ghost" id="clearFilters">Reset filters</button></div></div>` : ''}<div class="tablewrap"><table><thead><tr>${employee ? '<th>File</th><th>Submitted</th><th>Current update</th><th>Action</th>' : '<th>File / case</th><th>Submitted by</th><th>Verdict</th><th>Workflow</th><th>Size</th><th>Action</th>'}</tr></thead><tbody>${tableRows(shown, employee)}</tbody></table></div><div class="tablefoot"><span>Showing ${total ? ((casePage - 1) * per + 1) : 0}–${Math.min(casePage * per, total)} of ${total}</span><div style="display:flex;gap:6px"><button class="btn small" id="prevPage" ${casePage === 1 ? 'disabled' : ''}>← Previous</button><button class="btn small" id="nextPage" ${casePage === pages ? 'disabled' : ''}>Next →</button></div></div></div>`
+      } function adminOverview() {
+        const emp = state.role === 'employee'; const mine = cases().filter(c => c.employee === 'Aarav Shah'); const c = counts(); const s = emp ? { total: mine.length, pending: mine.filter(x => x.status !== 'Resolved').length, suspicious: mine.filter(x => x.verdict === 'Suspicious').length, malicious: mine.filter(x => x.verdict === 'Malicious').length } : c;
+        let bars = [35, 55, 40, 68, 50, 74, 60], bars2 = [25, 33, 28, 47, 40, 36, 52]; return `${head(emp ? 'EMPLOYEE WORKSPACE' : 'SECURITY OPERATIONS', emp ? 'My security workspace' : 'Security overview', emp ? 'Submit files for controlled review and track investigation outcomes.' : 'Monitor submissions, review suspicious files, and record defensible investigation decisions.', emp ? `<button class="btn primary" id="uploadMain">＋ Submit a file</button>` : `<button class="btn" data-page="reports">Export reports</button><button class="btn primary" data-page="cases">Open review queue →</button>`)}${banner()}<div class="grid stats">${stat(emp ? 'My submissions' : 'Total submissions', s.total, emp ? 'Files submitted by your account' : 'Across all demonstration cases', '▤', '#80a7ff')}${stat('Pending review', s.pending, 'Awaiting a recorded outcome', '◷', '#f5bd66')}${stat('Suspicious', s.suspicious, 'Requires contextual investigation', '⚑', '#f5bd66')}${stat('Malicious', s.malicious, 'Sample records labelled malicious', '⌁', '#ff7185')}</div><div class="grid split"><div class="card"><div class="cardhead"><div><h2>${emp ? 'My submission activity' : 'Triage activity'}</h2><p>Illustrative activity · not production telemetry</p></div><span class="pill pending">DEMO DATA</span></div><div class="cardbody"><div class="chart">${['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map((d, i) => `<div class="baritem"><div class="bars"><div class="bar" style="height:${bars[i]}%"></div><div class="bar alt" style="height:${bars2[i]}%"></div></div><div class="barlabel">${d}</div></div>`).join('')}</div><div class="legend"><span>Submissions</span><span class="l2">Resolved reviews</span><span style="margin-left:auto">Example trend</span></div></div></div><div class="card"><div class="cardhead"><div><h2>Platform status</h2><p>Configured demo services</p></div><span class="pill resolved">Available</span></div><div class="cardbody"><div class="statusline"><div class="statuscircle">✓</div><div><strong>Web application</strong><small>Running in local browser</small></div><div class="statusright">Ready</div></div><div class="statusline"><div class="statuscircle" style="background:#2d271b;color:var(--amber)">!</div><div><strong>Static analysis engine</strong><small>Demo adapter · no real scan</small></div><div class="statusright" style="color:var(--amber)">Mock</div></div><div class="statusline"><div class="statuscircle" style="background:#29203f;color:var(--purple)">✧</div><div><strong>Local AI explanation</strong><small>Prewritten example outputs</small></div><div class="statusright" style="color:var(--purple)">Mock</div></div><div class="statusline"><div class="statuscircle" style="background:#2d271b;color:var(--amber)">◉</div><div><strong>Endpoint telemetry</strong><small>Seeded sample endpoints</small></div><div class="statusright" style="color:var(--amber)">Simulated</div></div></div></div></div><div class="grid quickgrid">${emp ? `<button class="quick" id="quickUpload"><div class="quickico">⇧</div><div><strong>Submit suspicious file</strong><small>Start a review request</small></div></button><button class="quick" data-page="cases"><div class="quickico">▤</div><div><strong>Track my cases</strong><small>Review status and outcomes</small></div></button><button class="quick" data-page="reports"><div class="quickico">▧</div><div><strong>My case reports</strong><small>Export demo case details</small></div></button>` : `<button class="quick" data-page="cases"><div class="quickico">⌕</div><div><strong>Investigate case queue</strong><small>Review files and findings</small></div></button><button class="quick" data-page="endpoints"><div class="quickico">▣</div><div><strong>Endpoint inventory</strong><small>Inspect sample telemetry</small></div></button><button class="quick" data-page="audit"><div class="quickico">◷</div><div><strong>Audit history</strong><small>Review recorded demo actions</small></div></button>`}</div>${casesTable(false)}`
+      }
+      function employeeOverview() {
+        const mine = cases().filter(c => c.employee === 'Aarav Shah');
+        const pending = mine.filter(c => c.status !== 'Resolved').length;
+        const ready = mine.filter(c => c.status === 'Resolved').length;
+        const recent = mine.slice(0, 3);
+        return `${head('EMPLOYEE PORTAL', 'My file reviews', 'Submit a file for your security team or check an existing review.', `<button class="btn primary" id="uploadMain">＋ Submit a file</button>`)}
+ <div class="employee-intro"><div class="introicon">✓</div><div class="introcopy"><h2>Welcome back, Aarav</h2><p>One place to submit a file and see what your security team decides. You do not need to understand the technical scan details.</p></div><div class="introhelp"><span class="mini-dot"></span><span>Simple submission tracking</span></div></div>
+ <div class="grid stats employee-stats">${stat('My submissions', mine.length, 'Files sent for review', '▤', '#80a7ff')}${stat('Awaiting review', pending, 'Your team is still reviewing', '◷', '#d9a343')}${stat('Review completed', ready, 'A result is available', '✓', '#39b989')}</div>
+ <div class="card employee-recent"><div class="cardhead"><div><h2>Recent submissions</h2><p>Open a submission to see its latest update.</p></div><button class="btn small" data-page="cases">View all →</button></div>
+ ${recent.length ? `<div class="employee-list">${recent.map(c => `<div class="employee-listrow"><div class="fileicon">EXE</div><div class="employee-fileinfo"><strong>${esc(c.file)}</strong><small>${esc(c.id)} · Submitted ${fmtDate(c.submitted)}</small></div><div class="employee-result"><span class="result-label">Current status</span>${pill(c.status === 'Resolved' ? c.verdict : c.status)}</div><button class="btn small" data-open-case="${esc(c.id)}">View update →</button></div>`).join('')}</div>` : `<div class="employee-empty"><div class="empty-icon">＋</div><strong>No files submitted yet</strong><p>Submit a file when you need your security team to review it.</p><button class="btn primary" id="uploadEmpty">Submit a file</button></div>`}</div>
+ <p class="footnote employee-footnote">Demo only: files are not sent to a server or opened. Example results are not real malware scans.</p>`
+      } function overview() { return state.role === 'employee' ? employeeOverview() : adminOverview() }
+      function casesPage() { return `${head(state.role === 'employee' ? 'EMPLOYEE WORKSPACE' : 'CASE MANAGEMENT', state.role === 'employee' ? 'My submissions' : 'Submission review queue', state.role === 'employee' ? 'Track submitted files and review recorded decisions.' : 'Search, inspect and manage suspicious file submissions.', state.role === 'employee' ? `<button class="btn primary" id="uploadMain">＋ Submit a file</button>` : `<button class="btn" id="exportCases">Export CSV ↓</button>`)}${state.role === 'employee' ? employeeBanner() : banner()}${casesTable(true)}` }
+      function endpointsPage() { if (state.role === 'employee') return `${head('WORKSPACE', 'Endpoint inventory', 'Endpoint telemetry is restricted to the administrator demonstration view.')}${banner()}<div class="card"><div class="empty">▣<strong>Administrator access required</strong>Switch to Admin SOC to view demonstration endpoint inventory.</div></div>`; return `${head('FLEET MONITORING', 'Endpoint inventory', 'Sample hosts and heartbeat data demonstrate the planned telemetry interface.', '<button class="btn" id="simulateHeartbeat">↻ Simulate heartbeat</button>')}${banner()}<div class="grid stats">${stat('Registered endpoints', state.endpoints.length, 'Seeded demo inventory', '▣', '#80a7ff')}${stat('Online', state.endpoints.filter(e => e.state === 'Online').length, 'Recent simulated heartbeat', '◉', '#4dd4a6')}${stat('Stale', state.endpoints.filter(e => e.state === 'Stale').length, 'Needs connectivity review', '◷', '#f5bd66')}${stat('Needs review', state.endpoints.filter(e => e.security === 'Needs review').length, 'Sample security status', '⚑', '#ff7185')}</div><div class="filters" style="margin-bottom:14px"><input class="field search" id="endpointSearch" placeholder="Search hostname, user, IP…" value="${esc(query)}"/><select class="select" id="endpointFilter"><option>All endpoints</option><option>Online</option><option>Stale</option><option>Needs review</option></select></div><div class="grid endpointgrid" id="endpointGrid">${endpointCards()}</div>` }
+      function endpointCards() { let items = state.endpoints.filter(e => !query || [e.host, e.user, e.ip, e.os, e.id].join(' ').toLowerCase().includes(query.toLowerCase())); return items.map(e => `<div class="card endpoint"><div class="ephead"><div class="epicon">▣</div><div><strong>${esc(e.host)}</strong><small>${esc(e.id)} · ${esc(e.os)}</small></div><div class="epstate">${endpointPill(e)}</div></div><div class="epmeta"><div><span>Assigned user</span><strong>${esc(e.user)}</strong></div><div><span>IP address</span><strong>${esc(e.ip)}</strong></div><div><span>Installed software</span><strong>${e.software} packages</strong></div><div><span>Recent events</span><strong>${e.events} events</strong></div></div><div class="epfoot"><span>Heartbeat ${fmtDate(e.heartbeat)}</span><button class="linkbtn" data-open-endpoint="${e.id}">Details ↗</button></div></div>`).join('') || `<div class="card empty">No endpoints match that search.</div>` }
+      function reportsPage() { let all = cases().filter(c => state.role !== 'employee' || c.employee === 'Aarav Shah'); if (state.role === 'employee') return `${head('MY RECORDS', 'My reports', 'Open or print a report for one of your submissions.')}<div class="card"><div class="cardhead"><div><h2>Your submission reports</h2><p>Reports include the current status and the recorded review outcome.</p></div></div><div class="tablewrap"><table><thead><tr><th>File</th><th>Submitted</th><th>Status</th><th>Result</th><th>Report</th></tr></thead><tbody>${all.map(c => `<tr><td><strong>${esc(c.file)}</strong><div style="font-size:10px;color:var(--muted)">${esc(c.id)}</div></td><td>${fmtDate(c.submitted)}</td><td>${pill(c.status)}</td><td>${pill(c.verdict)}</td><td><button class="btn small" data-report="${esc(c.id)}">Open report →</button></td></tr>`).join('') || '<tr><td colspan="5"><div class="empty"><strong>No reports yet</strong>Reports will appear after you submit a file.</div></td></tr>'}</tbody></table></div></div><p class="footnote">Report details are based on this browser demonstration and are not a real malware scan.</p>`; return `${head('INVESTIGATION RECORDS', 'Reports & evidence', 'Export case records for academic demonstration and review.')}${banner()}<div class="grid stats">${stat('Available cases', all.length, 'Records eligible for viewing', '▤', '#80a7ff')}${stat('Resolved cases', all.filter(c => c.status === 'Resolved').length, 'Completed workflow records', '✓', '#4dd4a6')}${stat('Analysis-labelled', all.filter(c => c.analysis?.mode).length, 'Includes simulated records', '⌁', '#aa8cff')}${stat('Audit events', state.audit.length, 'Locally recorded actions', '◷', '#f5bd66')}</div><div class="card"><div class="cardhead"><div><h2>Investigation report register</h2><p>Choose a case to view or export a report</p></div><button class="btn" id="exportAllJson">Export all JSON ↓</button></div><div class="tablewrap"><table><thead><tr><th>Case</th><th>File</th><th>Submitted</th><th>Verdict</th><th>Report</th></tr></thead><tbody>${all.map(c => `<tr><td><strong>${esc(c.id)}</strong></td><td>${esc(c.file)}</td><td>${fmtDate(c.submitted)}</td><td>${pill(c.verdict)}</td><td><button class="btn small" data-report="${esc(c.id)}">View / print ↗</button></td></tr>`).join('') || `<tr><td colspan="5">No reports available.</td></tr>`}</tbody></table></div></div><p class="footnote">Print / Save as PDF uses your browser's print dialog. Reports explicitly identify simulated analysis data.</p>` }
+      function auditPage() { if (state.role === 'employee') return `${head('ACTIVITY', 'My activity', 'Administrator audit logs are not exposed in the employee demo view.')}${banner()}<div class="card"><div class="empty">Employee history is shown under My submissions.</div></div>`; return `${head('GOVERNANCE', 'Audit history', 'Local demonstration log of actions performed in this browser.', '<button class="btn" id="exportAudit">Export JSON ↓</button>')}${banner()}<div class="card"><div class="tablewrap"><table><thead><tr><th>Timestamp</th><th>Action</th><th>Actor</th><th>Case ID</th><th>Details</th></tr></thead><tbody>${state.audit.map(a => `<tr><td>${fmtDate(a.time)}</td><td>${esc(a.action)}</td><td>${esc(a.actor)}</td><td>${esc(a.caseId)}</td><td>${esc(a.detail)}</td></tr>`).join('')}</tbody></table></div></div>` }
+      function settingsPage() { return `${head('CONFIGURATION', 'Demo settings', 'Manage this browser’s seeded data and demonstration identity.')}${banner()}<div class="grid split"><div class="card"><div class="cardhead"><h2>Demonstration environment</h2></div><div class="cardbody"><div class="statusline"><div class="statuscircle">✓</div><div><strong>LocalStorage persistence</strong><small>Records are saved in this browser only</small></div><div class="statusright">Enabled</div></div><div class="statusline"><div class="statuscircle" style="color:var(--amber);background:#302715">!</div><div><strong>API / database connection</strong><small>No backend configured for this file</small></div><div class="statusright" style="color:var(--amber)">Offline demo</div></div><div class="statusline"><div class="statuscircle" style="color:var(--purple);background:#29203f">✧</div><div><strong>Local GGUF inference</strong><small>Mock explanation adapter is active</small></div><div class="statusright" style="color:var(--purple)">Mock</div></div></div></div><div class="card"><div class="cardhead"><h2>Reset demonstration</h2></div><div class="cardbody"><p style="color:var(--muted);font-size:12px">Restore the initial seed cases, endpoint records, notifications and audit history. This removes changes made in this browser.</p><button class="btn danger" id="resetDemo">Reset all demo data</button><p class="footnote">This does not delete files from your computer. This demo does not upload or persist the actual file bytes.</p></div></div></div>` }
+      function getAssistantCase() {
+        const list = cases();
+        if (!assistantCaseId || !state.cases.some(c => c.id === assistantCaseId)) assistantCaseId = list[0]?.id || null;
+        return state.cases.find(c => c.id === assistantCaseId) || null;
+      }
+      function assistantResponse(question, c) {
+        const q = question.toLowerCase(), a = c.analysis || {}, findings = a.findings || [], imports = a.imports || [], rules = a.yara || [];
+        const simulated = a.mode === 'SIMULATED';
+        const sourceNote = simulated ? 'Important: this case contains SIMULATED/demo analysis data. This helper is scripted; llama.cpp / the local GGUF model is not connected.' : 'This explanation is based only on fields present in this case record.';
+        const lines = (findings.length ? findings.map(f => `• ${f[0]}: ${f[1]} Interpretation: ${f[2] || 'Needs analyst context.'}`).join('\n') : 'No actual analysis findings are available in this case record.');
+        const importText = imports.length ? imports.join(', ') : 'No import list is available in this record.';
+        const yaraText = rules.length ? rules.map(r => `${r.name}${r.desc ? ' — ' + r.desc : ''}`).join('\n') : 'No YARA matches are listed in this case record.';
+        if (/entropy/.test(q)) {
+          return `Entropy for ${c.file}\n${a.entropy == null ? 'No entropy value is available for this submission.' : `Recorded entropy value: ${a.entropy}. ${simulated ? 'This is a seeded sample value, not calculated from the uploaded file.' : 'This value is stored in the case record.'}`}\n\nEntropy measures how varied byte values are. High entropy can be associated with compression or packing, but it is not proof of malware. Interpret it with section names, imports, provenance, signatures and other verified evidence.\n\n${sourceNote}`;
+        }
+        if (/yara|rule match|signature/.test(q)) {
+          return `YARA review for ${c.file}\n${yaraText}\n\nA rule match means a rule pattern was reported; it does not automatically prove maliciousness. Review the actual rule, matched condition, sample provenance and false-positive behavior. ${simulated ? 'No YARA engine or local rule set ran in this HTML demo.' : 'Confirm the stored result with the configured analysis record.'}\n\n${sourceNote}`;
+        }
+        if (/import|api call|imports/.test(q)) {
+          return `Import indicators for ${c.file}\nRecorded imports: ${importText}\n\nImports show functions a program may use; they do not show by themselves how the program uses them at runtime. Memory/process APIs and dynamic library-loading functions can be legitimate. Check surrounding code, signer, file origin and other findings before drawing a conclusion.\n\n${sourceNote}`;
+        }
+        if (/missing evidence|what evidence|evidence do we need|more evidence|next step|recommend|what should|investigate further/.test(q)) {
+          return `Suggested next steps for ${c.id}\n1. Confirm the current analysis provenance. ${simulated ? 'This demo record is not the result of a real scan.' : 'Check the analysis source and timestamp.'}\n2. In the real environment, run PE parsing, SHA-256, section entropy and local YARA against the quarantined bytes inside an isolated, unprivileged worker.\n3. Verify Authenticode/signature status and file origin if those fields are available in your pipeline. They are not represented here unless explicitly listed.\n4. Compare indicators with the complete evidence and relevant endpoint/user context; document what is confirmed versus unknown.\n5. Keep the file quarantined until the authorised reviewer records a decision. Do not let the AI helper approve or release it.\n\n${sourceNote}`;
+        }
+        if (/false positive|legitimate|benign/.test(q)) {
+          return `False-positive considerations for ${c.file}\nYes, static indicators can have legitimate explanations. Common imports, high entropy, and broad pattern matches are not sufficient on their own to label a file malicious.\n\nCurrent record: verdict = ${c.verdict}; workflow = ${c.status}. The findings recorded here are:\n${lines}\n\nReview provenance, signature, actual matched YARA conditions and corroborating evidence before changing the verdict. ${sourceNote}`;
+        }
+        if (/mitre|att&ck|technique|tactic/.test(q)) {
+          return `MITRE ATT&CK mapping guidance for ${c.file}\nThis record does not provide enough verified behavioral evidence to assign a confident ATT&CK technique solely from the listed imports or entropy. Treat any mapping as a candidate hypothesis until supported by specific observed behavior and evidence.\n\nFor this demo, record a technique only if you can cite the behavior, data source and relevant timestamp. ${sourceNote}`;
+        }
+        if (/safe|malicious|verdict|classif|can we conclude|is this file/.test(q)) {
+          return `Assessment boundary for ${c.id}\nCurrent recorded verdict: ${c.verdict}. Workflow status: ${c.status}.\n\n${a.summary || 'No analysis summary is available.'}\n\n${simulated ? 'Because this is seeded/demo data, it cannot support a real-world Safe, Suspicious or Malicious classification.' : 'The assistant can summarize stored evidence but cannot independently establish the final classification.'} Static indicators can support a decision but cannot guarantee safety or prove maliciousness by themselves. The authorised administrator must make and record the final decision.\n\n${sourceNote}`;
+        }
+        if (/summar|overview|what happened|explain this case|case details/.test(q)) {
+          return `Case summary — ${c.id}\nFile: ${c.file} (${fmtSize(c.size)})\nSubmitted by: ${c.employee}\nWorkflow: ${c.status}\nRecorded verdict: ${c.verdict}\nArchitecture: ${a.arch || 'Not available'}\nEntropy field: ${a.entropy == null ? 'Not available' : a.entropy}\nYARA entries: ${rules.length}\n\n${a.summary || 'No analysis summary is available.'}\n\nFindings:\n${lines}\n\n${sourceNote}`;
+        }
+        if (/indicator|finding|explain|evidence/.test(q)) {
+          return `Recorded indicators for ${c.id}\n${lines}\n\nImports listed: ${importText}\nYARA records: ${yaraText}\n\nInterpret these fields together with trustworthy provenance and corroborating evidence. A single import, entropy value or YARA match is not enough to prove maliciousness. ${sourceNote}`;
+        }
+        return `I can help explain the selected case using the fields recorded in CyberHuntX.\n\nSelected case: ${c.id} · ${c.file}\nCurrent workflow: ${c.status} · Recorded verdict: ${c.verdict}\n\n${a.summary || 'No analysis summary is available.'}\n\nTry asking me to summarize the case, explain entropy, review YARA matches, explain imports, identify missing evidence, consider false positives, discuss possible ATT&CK mapping, or suggest defensive next steps.\n\n${sourceNote}`;
+      }
+      function aiMessageHtml(m) { const user = m.role === 'user'; return `<div class="ai-message ${user ? 'user' : 'assistant'}"><div class="ai-message-avatar">${user ? 'AS' : '✧'}</div><div class="ai-message-body"><div class="ai-message-meta"><strong>${user ? 'You' : 'CyberHuntX helper'}</strong><span>${fmtDate(m.time || new Date().toISOString())}</span></div><div class="ai-bubble">${esc(m.text)}</div>${!user ? '<div class="ai-citation">Based on the selected case record · Demo assistant</div>' : ''}</div></div>` }
+      function aiAssistantPage() {
+        if (state.role === 'employee') return `${head('EMPLOYEE WORKSPACE', 'AI Assistant unavailable', 'The investigation assistant is restricted to the administrator review workflow.')}${employeeBanner()}<div class="card"><div class="empty"><div class="ai-orb">✧</div><strong>For the security review team</strong><p>The AI Investigation Assistant is available in the Admin SOC view. Your employee portal stays focused on submitting a file and checking its status.</p></div></div>`;
+        const c = getAssistantCase();
+        if (!c) return `${head('LOCAL INTELLIGENCE', 'AI Investigation Assistant', 'Ask questions about case evidence and review steps.')}${banner()}<div class="card empty">No case records are available yet. Submit a demo case first.</div>`;
+        const a = c.analysis || {}; const chat = state.aiChats[c.id] || [];
+        const welcome = { role: 'assistant', time: c.submitted, text: `Hello. I can help you interpret the record for ${c.file}. I can summarize recorded findings, explain common indicators, identify evidence gaps, and suggest defensive next steps. I will not make the final verdict or release decision.\n\n${a.summary || 'This case does not have an analysis summary yet.'}\n\nNote: this is a scripted demonstration helper, not a connected local language model. The evidence shown may be simulated.` };
+        const messages = chat.length ? chat : [welcome];
+        return `${head('LOCAL INTELLIGENCE', 'AI Investigation Assistant', 'Ask plain-language questions about a case. The assistant explains evidence for the analyst; it does not approve files.')}${banner()}
+ <div class="grid ai-layout">
+  <div class="ai-sidebar">
+   <div class="card ai-context"><div class="ai-context-top"><div class="ai-orb">✧</div><div><strong>Case context</strong><small>Choose the case to discuss</small></div></div>
+    <label class="ai-fieldlabel" for="aiCaseSelect">Selected investigation</label><select class="select ai-case-select" id="aiCaseSelect">${cases().map(x => `<option value="${esc(x.id)}" ${x.id === c.id ? 'selected' : ''}>${esc(x.id)} · ${esc(x.file)}</option>`).join('')}</select>
+    <div class="detailitem"><span>File name</span><strong>${esc(c.file)}</strong></div><div class="ai-facts"><div class="ai-fact"><span>Workflow</span><strong>${esc(c.status)}</strong></div><div class="ai-fact"><span>Recorded verdict</span><strong>${esc(c.verdict)}</strong></div><div class="ai-fact"><span>Analysis mode</span><strong>${esc(a.mode || 'Unavailable')}</strong></div><div class="ai-fact"><span>Entropy field</span><strong>${a.entropy == null ? 'Unavailable' : esc(a.entropy)}</strong></div></div>
+    <p class="ai-context-summary">${esc(a.summary || 'No analysis summary is available for this case.')}</p>
+    <button class="btn small ai-case-open" data-open-case="${esc(c.id)}">Open full investigation ↗</button>
+   </div>
+   <div class="card ai-context"><div class="cardhead" style="padding:0 0 12px;border:0"><div><h2>Suggested questions</h2><p>Choose a starting point</p></div></div><div class="ai-prompts">
+    <button class="ai-prompt" data-ai-prompt="Summarize this case in plain English">✦ <span>Summarize this case</span><span class="prompt-arrow">↗</span></button>
+    <button class="ai-prompt" data-ai-prompt="Explain the main indicators and their limitations">⌕ <span>Explain the main indicators</span><span class="prompt-arrow">↗</span></button>
+    <button class="ai-prompt" data-ai-prompt="What evidence is missing and what should an analyst do next?">◎ <span>Identify evidence gaps</span><span class="prompt-arrow">↗</span></button>
+    <button class="ai-prompt" data-ai-prompt="Could these findings be a false positive?">◇ <span>Consider false positives</span><span class="prompt-arrow">↗</span></button>
+    <button class="ai-prompt" data-ai-prompt="Can we conclude this file is malicious or safe? Explain the limits.">⚖ <span>Review classification limits</span><span class="prompt-arrow">↗</span></button>
+   </div></div>
+   <div class="ai-disclaimer"><span>ⓘ</span><div><strong>Demo helper, not a connected model.</strong><br>Responses use scripted rules and this case's stored fields. llama.cpp / GGUF inference is not running in this standalone HTML file.</div></div>
+  </div>
+  <div class="card ai-chat"><div class="ai-chat-head"><div class="ai-chat-title"><div class="ai-orb" style="width:36px;height:36px;border-radius:12px">✧</div><div><strong>Investigation conversation</strong><small>Context: ${esc(c.id)} · ${esc(c.file)}</small></div></div><div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap"><span class="ai-state">Demo response mode</span><button class="btn small ghost" id="aiClearChat" type="button">Clear chat</button></div></div>
+   <div class="ai-messages" id="aiMessages">${messages.map(aiMessageHtml).join('')}</div>
+   <div class="ai-composer"><form class="ai-composer-form" id="aiForm"><textarea class="ai-prompt-input" id="aiPrompt" rows="2" aria-label="Ask the AI investigation assistant" placeholder="Ask about the evidence, uncertainty, or next steps…"></textarea><button class="btn primary ai-send" type="submit" aria-label="Send question" title="Send question">➤</button></form><div class="ai-composer-note">Enter to send · Shift+Enter for a new line · Answers are simulated and must be reviewed by an analyst.</div></div>
+  </div>
+ </div>`;
+      }
+      function askAssistant(question) {
+        const text = String(question || '').trim(); if (!text) return toast('Enter a question', 'Ask about the selected case evidence or next steps.');
+        if (state.role !== 'admin') return toast('Administrator view required', 'The investigation assistant is restricted to the SOC workflow.');
+        const c = getAssistantCase(); if (!c) return toast('No case selected', 'Create or select a case first.');
+        const chat = state.aiChats[c.id] || (state.aiChats[c.id] = []); chat.push({ role: 'user', text, time: new Date().toISOString() }); chat.push({ role: 'assistant', text: assistantResponse(text, c), time: new Date().toISOString() }); state.aiChats[c.id] = chat.slice(-40); audit('AI assistant queried', c.id, 'Scripted demonstration helper; local GGUF inference is not connected.'); save(); page = 'ai'; render(); const box = $('aiMessages'); if (box) box.scrollTop = box.scrollHeight;
+      }
+      function render() { if (state.role === 'employee' && page === 'ai') page = 'overview'; drawNav(); $('crumb').textContent = ({ overview: 'Overview', cases: state.role === 'employee' ? 'My submissions' : 'Case queue', endpoints: 'Endpoints', reports: 'Reports', ai: 'AI Assistant', audit: 'Audit history', settings: 'Demo settings' })[page] || 'Overview'; $('topTitle').textContent = state.role === 'employee' ? 'Employee workspace' : 'Security operations'; $('username').textContent = state.role === 'employee' ? 'Aarav Shah' : 'SOC Administrator'; $('userrole').textContent = state.role === 'employee' ? 'Employee account' : 'Security Operations'; $('avatar').textContent = state.role === 'employee' ? 'AS' : 'SA'; document.querySelectorAll('[data-role]').forEach(b => b.classList.toggle('active', b.dataset.role === state.role)); const views = { overview, cases: casesPage, endpoints: endpointsPage, reports: reportsPage, ai: aiAssistantPage, audit: auditPage, settings: settingsPage }; $('content').innerHTML = (views[page] || overview)(); $('notifyDot').classList.toggle('hide', state.notifications.every(n => n.read)); }
+      function openModal(title, body, buttons = []) { $('modalTitle').textContent = title; $('modalbody').innerHTML = body; $('modalfoot').innerHTML = buttons.map(b => `<button class="btn ${b.primary ? 'primary' : ''} ${b.danger ? 'danger' : ''}" data-modal-action="${b.action}">${b.label}</button>`).join(''); $('modalback').classList.add('open'); }
+      function closeModal() { $('modalback').classList.remove('open'); selectedCase = null; selectedEndpoint = null; pendingFile = null; }
+      function caseDetail(id) {
+        const c = state.cases.find(x => x.id === id); if (!c) return toast('Case not found'); selectedCase = id; const a = c.analysis || {};
+        if (state.role === 'employee') {
+          const statusTitle = c.status === 'Resolved' ? 'Review completed' : 'Your file is waiting for review';
+          let message = 'Your submission is in the review queue. Your security team will update this page when there is a result. No further action is needed right now.';
+          if (c.status === 'Resolved' && c.verdict === 'Safe') message = 'The security team completed its review and recorded a Safe result based on the available review. This is not an absolute guarantee that a file is harmless.';
+          if (c.verdict === 'Suspicious') message = 'The security team needs more checking before this file can be treated as safe. Follow your organisation’s IT guidance and do not share the file elsewhere.';
+          if (c.verdict === 'Malicious') message = 'The security team marked this file as Malicious. Do not open or share it. Contact your IT team if you need help.';
+          const updates = (c.notes || []).filter(n => /^Decision:/.test(n.text) || c.status === 'Resolved').map(n => `<div class="finding"><strong>${fmtDate(n.time)}</strong>${esc(n.text.replace(/^Decision:\s*/, 'Decision: '))}</div>`).join('');
+          const employeeBody = `<div style="display:flex;justify-content:space-between;gap:10px;align-items:flex-start;flex-wrap:wrap;margin-bottom:14px"><div><div style="color:var(--muted);font-size:11px">${esc(c.id)}</div><div style="font-size:19px;font-weight:750;margin-top:3px">${esc(c.file)}</div><div style="font-size:11px;color:var(--muted);margin-top:3px">Submitted ${fmtDate(c.submitted)}</div></div><div>${pill(c.status)}</div></div>
+  <div class="employee-status"><strong>${esc(statusTitle)}</strong><p>${esc(message)}</p></div>
+  <div class="detailgrid"><div class="detailitem"><span>Submission ID</span><strong>${esc(c.id)}</strong></div><div class="detailitem"><span>File size</span><strong>${fmtSize(c.size)}</strong></div><div class="detailitem"><span>Review status</span><strong>${esc(c.status)}</strong></div><div class="detailitem"><span>Team result</span><strong>${esc(c.verdict === 'Pending' ? 'Not available yet' : c.verdict)}</strong></div></div>
+  ${c.reason ? `<h3 class="subheading">Reason you provided</h3><div class="finding">${esc(c.reason)}</div>` : ''}
+  <h3 class="subheading">Updates from your security team</h3>${updates || '<div class="finding"><small>No additional update has been recorded yet.</small></div>'}
+  <div class="notice" style="margin-top:14px">This is a demonstration record. Any example result shown by this website uses sample data, not a real malware scan.</div>`;
+          openModal('Your submission', employeeBody, [{ label: 'Open report', action: 'report' }, { label: 'Close', action: 'close' }]); return;
+        }
+        let body = `<div style="display:flex;justify-content:space-between;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:16px"><div><div style="color:var(--muted);font-size:11px">${esc(c.id)}</div><div style="font-size:19px;font-weight:750;margin-top:3px">${esc(c.file)}</div><div style="font-size:11px;color:var(--muted);margin-top:3px">Submitted by ${esc(c.employee)} · ${fmtDate(c.submitted)}</div></div><div>${pill(c.verdict)} ${pill(c.status)}</div></div><div class="notice" style="margin-bottom:15px">SIMULATED ANALYSIS — The displayed findings are seeded demo data, not scan results generated from the uploaded file. Static indicators do not prove a file is safe or malicious.</div><div class="detailgrid"><div class="detailitem"><span>File size</span><strong>${fmtSize(c.size)}</strong></div><div class="detailitem"><span>Architecture</span><strong>${esc(a.arch || 'Unavailable')}</strong></div><div class="detailitem"><span>SHA-256</span><strong style="font-size:10px">${esc(c.sha256 || 'Not available')}</strong></div><div class="detailitem"><span>PE inspection</span><strong>${esc(a.pe || 'Not available')}</strong></div><div class="detailitem"><span>Entropy (sample)</span><strong>${a.entropy ?? 'Unavailable'}</strong></div><div class="detailitem"><span>YARA matches</span><strong>${(a.yara || []).length} illustrative match(es)</strong></div></div><h3 class="subheading">Static analysis indicators</h3>${(a.findings || []).map(f => `<div class="finding"><strong>${esc(f[0])}</strong>${esc(f[1])}<br><small>${esc(f[2])}</small></div>`).join('')}<div class="finding"><strong>Import table (sample)</strong><small>${esc((a.imports || []).join(', ') || 'No sample imports provided')}</small></div><h3 class="subheading">AI-assisted explanation</h3><div class="finding"><strong>Mock local-AI response</strong>${esc(a.summary || 'No explanation available.')}<small style="display:block;margin-top:5px">Provenance: predefined demonstration text; llama.cpp is not connected in this single-file demo.</small></div><h3 class="subheading">Investigation notes</h3>${(c.notes || []).map(n => `<div class="finding"><strong>${esc(n.author)} · ${fmtDate(n.time)}</strong>${esc(n.text)}</div>`).join('') || '<div class="finding"><small>No notes recorded yet.</small></div>'}`;
+        let buttons = [{ label: 'Export report', action: 'report' }, { label: 'Close', action: 'close' }]; if (state.role === 'admin') buttons = [{ label: 'Ask AI Assistant', action: 'ask-ai' }, { label: 'Add note', action: 'note' }, { label: 'Record decision', action: 'decision', primary: true }, { label: 'Export report', action: 'report' }, { label: 'Close', action: 'close' }]; else buttons = [{ label: 'Export report', action: 'report' }, { label: 'Close', action: 'close' }]; openModal('Case investigation', body, buttons)
+      }
+      function decisionForm() { const c = state.cases.find(x => x.id === selectedCase); if (!c) return; openModal('Record administrator decision', `<div class="notice" style="margin-bottom:15px">This is a demonstration decision stored in this browser. Real deployment requires authenticated backend authorization and a validated analysis pipeline.</div><div class="formgrid"><div class="formgroup"><label>Case ID</label><input class="field" value="${esc(c.id)}" disabled /></div><div class="formgroup"><label>Security verdict</label><select class="select" id="decisionVerdict"><option>Safe</option><option>Suspicious</option><option>Malicious</option></select></div><div class="formgroup"><label>Workflow status</label><select class="select" id="decisionStatus"><option>Resolved</option><option>Escalated</option><option>Pending review</option></select></div><div class="formgroup full"><label>Decision explanation (required)</label><textarea class="textarea" id="decisionText" placeholder="Explain the evidence and limitations behind this demonstration decision…"></textarea></div></div>`, [{ label: 'Cancel', action: 'back-detail' }, { label: 'Save decision', action: 'save-decision', primary: true }]); }
+      function noteForm() { openModal('Add investigation note', `<div class="formgroup"><label>Investigation note</label><textarea class="textarea" id="noteText" placeholder="Record evidence reviewed, uncertainty, and next steps…"></textarea></div>`, [{ label: 'Cancel', action: 'back-detail' }, { label: 'Save note', action: 'save-note', primary: true }]) }
+      function openEndpoint(id) { const e = state.endpoints.find(x => x.id === id); if (!e) return; selectedEndpoint = id; openModal('Endpoint details', `<div class="detailgrid"><div class="detailitem"><span>Endpoint ID</span><strong>${esc(e.id)}</strong></div><div class="detailitem"><span>Hostname</span><strong>${esc(e.host)}</strong></div><div class="detailitem"><span>Operating system</span><strong>${esc(e.os)}</strong></div><div class="detailitem"><span>Assigned user</span><strong>${esc(e.user)}</strong></div><div class="detailitem"><span>IP address</span><strong>${esc(e.ip)}</strong></div><div class="detailitem"><span>Simulated heartbeat</span><strong>${fmtDate(e.heartbeat)}</strong></div><div class="detailitem"><span>Installed software</span><strong>${e.software} packages</strong></div><div class="detailitem"><span>Sample security state</span><strong>${esc(e.security)}</strong></div></div><div class="notice">All endpoint information is seeded demonstration telemetry. No real workstation is connected.</div>`, [{ label: 'Close', action: 'close' }]) }
+      function reportText(c) { if (state.role === 'employee') { const decision = (c.notes || []).filter(n => /^Decision:/.test(n.text)).map(n => n.text).join('\n') || 'No additional review note recorded.'; return `CyberHuntX — My Submission Summary\n\nDEMONSTRATION REPORT — example data only\nSubmission ID: ${c.id}\nFile name: ${c.file}\nSubmitted: ${c.submitted}\nCurrent status: ${c.status}\nSecurity team result: ${c.verdict === 'Pending' ? 'Not available yet' : c.verdict}\n\nWhat this means:\n${c.verdict === 'Safe' ? 'The security team recorded a Safe result based on the available review. This is not an absolute guarantee that a file is harmless.' : c.verdict === 'Suspicious' ? 'The security team needs more checking. Follow your organisation’s IT guidance and do not share the file elsewhere.' : c.verdict === 'Malicious' ? 'The security team marked this file as Malicious. Do not open or share it. Contact your IT team if you need help.' : 'Your submission is waiting for review. Check this page for an update.'}\n\nReview update:\n${decision}\n\nNote: This website uses demonstration data and has not scanned or executed the selected file.`; } return `CyberHuntX Investigation Report\n\nDEMONSTRATION REPORT — ${c.analysis?.mode || 'SIMULATED'} DATA\nCase ID: ${c.id}\nFile: ${c.file}\nSize: ${fmtSize(c.size)}\nEmployee: ${c.employee}\nSubmitted: ${c.submitted}\nWorkflow status: ${c.status}\nSecurity verdict: ${c.verdict}\nSHA-256: ${c.sha256 || 'Not available'}\n\nAnalysis summary:\n${c.analysis?.summary || 'No analysis summary available.'}\n\nFindings:\n${(c.analysis?.findings || []).map(f => `${f[0]}: ${f[1]}\nInterpretation: ${f[2]}`).join('\n\n')}\n\nAdministrator notes:\n${(c.notes || []).map(n => `[${n.time}] ${n.author}: ${n.text}`).join('\n') || 'No notes recorded.'}\n\nLIMITATION: This single-file website uses demonstration data. It has not scanned or executed the uploaded file.` }
+      function showReport(id) { const c = state.cases.find(x => x.id === id); if (!c) return; const win = window.open('', '_blank'); if (!win) { downloadText(`${c.id}-report.txt`, reportText(c), 'text/plain'); return } win.document.write(`<!doctype html><html><head><title>${esc(c.id)} report</title><style>body{font:14px/1.6 Arial,sans-serif;max-width:850px;margin:40px auto;color:#172033;padding:0 22px}h1{font-size:24px}pre{white-space:pre-wrap;font:13px/1.6 monospace;background:#f3f5f8;padding:18px;border:1px solid #dce2eb;border-radius:8px}.mark{background:#fff4d8;padding:10px;border:1px solid #ead18a}</style></head><body><h1>CyberHuntX Investigation Report</h1><p class="mark">DEMONSTRATION REPORT — Simulated analysis data. Not a real malware scan.</p><pre>${esc(reportText(c))}</pre><button onclick="window.print()">Print / Save as PDF</button></body></html>`); win.document.close(); audit('Report opened for print', c.id, 'Demonstration report view generated') }
+      function downloadText(name, text, type = 'text/plain') { const blob = new Blob([text], { type }); const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = name; document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(url), 1000) }
+      function exportCases() { let rows = [['Case ID', 'File', 'Employee', 'Submitted', 'Status', 'Verdict', 'Size bytes', 'SHA-256'], ...cases().map(c => [c.id, c.file, c.employee, c.submitted, c.status, c.verdict, c.size, c.sha256 || ''])]; const csv = rows.map(r => r.map(v => '"' + String(v).replace(/"/g, '""') + '"').join(',')).join('\n'); downloadText('cyberhuntx-cases.csv', csv, 'text/csv'); toast('Case list exported', 'CSV contains demonstration data.') }
+      function uploadModal() { openModal('Submit a file for review', `<div class="notice" style="margin-bottom:14px">Demo only: this page does not send or run your file. It keeps only the file name, size and a browser-calculated hash for the example case. Use a harmless test file.</div><div class="dropzone" id="dropzone"><div class="upico">⇧</div><strong id="dropTitle">Choose a .EXE file or drop it here</strong><p id="dropDesc">Maximum demo file size: 25 MB</p><button type="button" class="btn" id="chooseFile">Choose file</button><input type="file" id="modalFile" accept=".exe,application/octet-stream" hidden></div><div id="fileStatus" style="margin-top:12px;font-size:11px;color:var(--muted)">No file selected.</div><div class="formgroup" style="margin-top:15px"><label>Reason for review</label><textarea class="textarea" id="uploadReason" placeholder="Tell us why you are submitting this file (optional)"></textarea></div>`, [{ label: 'Cancel', action: 'close' }, { label: 'Submit for review', action: 'create-case', primary: true }]); }
+      async function selectFile(file) { if (!file) return; if (!file.name.toLowerCase().endsWith('.exe')) { pendingFile = null; $('fileStatus').innerHTML = '<span style="color:var(--red)">Please select a file with the .exe extension.</span>'; return } if (file.size > 25 * 1024 * 1024) { pendingFile = null; $('fileStatus').innerHTML = '<span style="color:var(--red)">File exceeds the 25 MB demonstration limit.</span>'; return } pendingFile = file; $('dropTitle').textContent = file.name; $('dropDesc').textContent = fmtSize(file.size) + ' · metadata only'; $('fileStatus').innerHTML = '<span style="color:var(--green)">✓ File selected. It will not be executed or uploaded.</span> <span id="hashProgress"></span>'; }
+      async function createCase() { if (!pendingFile) { toast('Select an EXE first', 'Use a harmless test file for the demo.'); return } const f = pendingFile; let hash = ''; try { if (f.size <= 25 * 1024 * 1024 && crypto?.subtle) { const buf = await f.arrayBuffer(); const digest = await crypto.subtle.digest('SHA-256', buf); hash = Array.from(new Uint8Array(digest)).map(b => b.toString(16).padStart(2, '0')).join('') } } catch { } const id = 'CHX-' + new Date().getFullYear() + '-' + String(Math.max(1043, ...state.cases.map(c => Number(c.id.split('-').pop()) + 1))).padStart(4, '0'); const reason = ($('uploadReason')?.value || '').trim(); const c = { id, file: f.name, size: f.size, employee: 'Aarav Shah', email: 'aarav.shah@example.test', submitted: new Date().toISOString(), status: 'Pending review', verdict: 'Pending', sha256: hash, source: 'User-selected file metadata only', reason, notes: [], analysis: { mode: 'SIMULATED', pe: 'Not analysed in demo mode', arch: 'Not determined', entropy: null, imports: [], yara: [], summary: 'No actual static analysis was performed. The demo record is awaiting administrator review. Connect the FastAPI analysis service to obtain genuine findings.', findings: [['Analysis status', 'The file was submitted to the demonstration workflow.', 'No PE parsing, entropy calculation, disassembly or YARA scan has been run.']] }, events: [{ time: new Date().toISOString(), text: 'Submitted through single-file demonstration UI' }] }; state.cases.unshift(c); notify('New case submitted', id + ' · ' + f.name); audit('File metadata submitted', id, 'Demo record created; file bytes were not uploaded or retained. ' + (reason ? 'Reason: ' + reason : '')); save(); closeModal(); page = 'cases'; state.role = 'employee'; render(); toast('Demo case created', id + ' is now visible to the administrator.'); }
+      function notificationsModal() { state.notifications.forEach(n => n.read = true); save(); const body = state.notifications.length ? state.notifications.map(n => `<div class="finding"><strong>${esc(n.title)}</strong>${esc(n.detail)}<small style="display:block;margin-top:4px">${fmtDate(n.time)}</small></div>`).join('') : '<div class="empty">No notifications yet.</div>'; openModal('Notifications', body, [{ label: 'Mark all read & close', action: 'close' }]); render() }
+      function resetDemo() { if (!confirm('Reset all CyberHuntX demo changes in this browser and restore the original sample data?')) return; const oldRole = state.role; state = initial(); state.role = oldRole; assistantCaseId = null; save(); page = 'overview'; query = ''; statusFilter = 'All statuses'; closeModal(); render(); toast('Demo reset complete', 'Seed data restored.') }
+      // navigation and general actions
+      document.addEventListener('click', e => {
+        const nav = e.target.closest('[data-page]'); if (nav) { setPage(nav.dataset.page); return }
+        const role = e.target.closest('[data-role]'); if (role) { state.role = role.dataset.role; save(); page = 'overview'; query = ''; render(); toast('Demo role changed', state.role === 'admin' ? 'Admin SOC view enabled.' : 'Employee portal view enabled.'); return }
+        const aiPrompt = e.target.closest('[data-ai-prompt]'); if (aiPrompt) { askAssistant(aiPrompt.dataset.aiPrompt); return }
+        const clearAi = e.target.closest('#aiClearChat'); if (clearAi) { if (assistantCaseId) delete state.aiChats[assistantCaseId]; save(); render(); toast('Conversation cleared', 'Case data and investigation records were unchanged.'); return }
+        const cbtn = e.target.closest('[data-open-case]'); if (cbtn) { caseDetail(cbtn.dataset.openCase); return }
+        const ebtn = e.target.closest('[data-open-endpoint]'); if (ebtn) { openEndpoint(ebtn.dataset.openEndpoint); return }
+        const rbtn = e.target.closest('[data-report]'); if (rbtn) { showReport(rbtn.dataset.report); return }
+        const ma = e.target.closest('[data-modal-action]'); if (ma) { const action = ma.dataset.modalAction; switch (action) { case 'close': closeModal(); render(); break; case 'ask-ai': { const id = selectedCase; assistantCaseId = id; closeModal(); page = 'ai'; render(); break } case 'back-detail': { const id = selectedCase; caseDetail(id); break } case 'note': noteForm(); break; case 'decision': decisionForm(); break; case 'save-note': { const txt = ($('noteText')?.value || '').trim(); if (!txt) return toast('Note is required'); const c = state.cases.find(x => x.id === selectedCase); if (!c) return; c.notes = c.notes || []; c.notes.unshift({ author: 'SOC Administrator', text: txt, time: new Date().toISOString() }); audit('Investigation note added', c.id, txt); save(); caseDetail(c.id); toast('Investigation note saved'); break } case 'save-decision': { const c = state.cases.find(x => x.id === selectedCase); const verdict = $('decisionVerdict')?.value, status = $('decisionStatus')?.value, txt = ($('decisionText')?.value || '').trim(); if (!txt) return toast('Add a decision explanation', 'A recorded decision must include context.'); c.verdict = verdict; c.status = status; c.notes = c.notes || []; c.notes.unshift({ author: 'SOC Administrator', text: 'Decision: ' + verdict + '. ' + txt, time: new Date().toISOString() }); c.events = c.events || []; c.events.unshift({ time: new Date().toISOString(), text: 'Administrator recorded ' + verdict + ' decision' }); notify('Case decision recorded', c.id + ' · ' + verdict); audit('Administrator decision recorded', c.id, verdict + ' / ' + status + ' — ' + txt); save(); caseDetail(c.id); toast('Decision recorded', c.id + ' updated across the demo.'); break } case 'report': showReport(selectedCase); break; case 'create-case': createCase(); break; }return }
+        if (e.target.closest('#uploadMain') || e.target.closest('#uploadTop') || e.target.closest('#uploadEmpty') || e.target.closest('#quickUpload')) { uploadModal(); return }
+        if (e.target.closest('#chooseFile')) { $('modalFile').click(); return }
+        if (e.target.closest('#prevPage')) { casePage = Math.max(1, casePage - 1); render(); return } if (e.target.closest('#nextPage')) { casePage++; render(); return }
+        if (e.target.closest('#clearFilters')) { query = ''; statusFilter = 'All statuses'; casePage = 1; render(); return }
+        if (e.target.closest('#exportCases')) { exportCases(); return }
+        if (e.target.closest('#exportAllJson')) { downloadText('cyberhuntx-demo-cases.json', JSON.stringify(cases().filter(c => state.role !== 'employee' || c.employee === 'Aarav Shah'), null, 2), 'application/json'); toast('JSON exported', 'Demo case data downloaded.'); return }
+        if (e.target.closest('#exportAudit')) { downloadText('cyberhuntx-audit.json', JSON.stringify(state.audit, null, 2), 'application/json'); toast('Audit log exported'); return }
+        if (e.target.closest('#resetDemo')) { resetDemo(); return }
+        if (e.target.closest('#notifyBtn')) { notificationsModal(); return }
+        if (e.target.closest('#simulateHeartbeat')) { const e = state.endpoints.find(x => x.state === 'Stale') || state.endpoints[0]; e.state = 'Online'; e.heartbeat = new Date().toISOString(); audit('Simulated endpoint heartbeat', e.id, 'Demo heartbeat generated locally.'); save(); render(); toast('Demo heartbeat updated', e.host + ' now shows Online.'); return }
+        if (e.target.id === 'modalback') closeModal();
+      });
+      document.addEventListener('submit', e => { if (e.target.id === 'aiForm') { e.preventDefault(); const input = $('aiPrompt'); const q = input?.value || ''; askAssistant(q) } });
+      document.addEventListener('keydown', e => { if (e.target.id === 'aiPrompt' && e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); $('aiForm')?.requestSubmit() } });
+      document.addEventListener('input', e => { if (e.target.id === 'caseSearch') { query = e.target.value; casePage = 1; const pos = e.target.selectionStart; render(); const input = $('caseSearch'); if (input) { input.focus(); input.setSelectionRange(pos, pos) } } if (e.target.id === 'endpointSearch') { query = e.target.value; const g = $('endpointGrid'); if (g) g.innerHTML = endpointCards() } });
+      document.addEventListener('change', e => { if (e.target.id === 'aiCaseSelect') { assistantCaseId = e.target.value; render(); return } if (e.target.id === 'statusFilter') { statusFilter = e.target.value; casePage = 1; render() } if (e.target.id === 'endpointFilter') { let val = e.target.value; const grid = $('endpointGrid'); let els = state.endpoints.filter(ep => (!query || [ep.host, ep.user, ep.ip, ep.os, ep.id].join(' ').toLowerCase().includes(query.toLowerCase())) && (val === 'All endpoints' || val === 'Needs review' ? true : ep.state === val)); if (val === 'Needs review') els = state.endpoints.filter(ep => ep.security === 'Needs review' && (!query || [ep.host, ep.user, ep.ip, ep.os, ep.id].join(' ').toLowerCase().includes(query.toLowerCase()))); grid.innerHTML = els.map(e => `<div class="card endpoint"><div class="ephead"><div class="epicon">▣</div><div><strong>${esc(e.host)}</strong><small>${esc(e.id)} · ${esc(e.os)}</small></div><div class="epstate">${endpointPill(e)}</div></div><div class="epmeta"><div><span>Assigned user</span><strong>${esc(e.user)}</strong></div><div><span>IP address</span><strong>${esc(e.ip)}</strong></div><div><span>Installed software</span><strong>${e.software} packages</strong></div><div><span>Recent events</span><strong>${e.events} events</strong></div></div><div class="epfoot"><span>Heartbeat ${fmtDate(e.heartbeat)}</span><button class="linkbtn" data-open-endpoint="${e.id}">Details ↗</button></div></div>`).join('') || '<div class="card empty">No endpoints match the selected filter.</div>' } });
+      document.addEventListener('change', e => { if (e.target.id === 'modalFile' && e.target.files?.[0]) selectFile(e.target.files[0]) });
+      document.addEventListener('dragover', e => { const dz = e.target.closest('#dropzone'); if (dz) { e.preventDefault(); dz.classList.add('drag') } }); document.addEventListener('dragleave', e => { const dz = e.target.closest('#dropzone'); if (dz) dz.classList.remove('drag') }); document.addEventListener('drop', e => { const dz = e.target.closest('#dropzone'); if (dz) { e.preventDefault(); dz.classList.remove('drag'); if (e.dataTransfer.files?.[0]) selectFile(e.dataTransfer.files[0]) } });
+      $('closeModal').addEventListener('click', closeModal); $('mobilemenu').addEventListener('click', () => $('sidebar').classList.toggle('open')); document.addEventListener('keydown', e => { if (e.key === 'Escape') { closeModal(); $('sidebar').classList.remove('open') } if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') { e.preventDefault(); if (page !== 'cases') setPage('cases'); setTimeout(() => $('caseSearch')?.focus(), 30) } });
+      // Persist the chosen appearance independently from demo business data.
+      const THEME_KEY = 'cyberhuntx_theme_v1';
+      function applyTheme(theme) { document.body.classList.toggle('light', theme === 'light'); const b = $('themeToggle'); if (b) { const light = theme === 'light'; const symbol = b.querySelector('.theme-symbol'); const label = b.querySelector('.theme-label'); if (symbol) symbol.textContent = light ? '☾' : '☼'; if (label) label.textContent = light ? 'Dark mode' : 'Light mode'; b.title = light ? 'Switch to dark mode' : 'Switch to light mode'; b.setAttribute('aria-label', b.title); b.setAttribute('aria-pressed', String(light)); document.querySelector('meta[name="theme-color"]')?.setAttribute('content', light ? '#f5f7fb' : '#0b1220') } try { localStorage.setItem(THEME_KEY, theme) } catch { } }
+      let savedTheme = 'light'; try { savedTheme = localStorage.getItem(THEME_KEY) || 'light' } catch { } applyTheme(savedTheme);
+      $('themeToggle').addEventListener('click', () => { const next = document.body.classList.contains('light') ? 'dark' : 'light'; applyTheme(next); toast(next === 'light' ? 'Light mode enabled' : 'Dark mode enabled') });
+      render();
+    })();
+  </script>
+</body>
+
+</html>
